@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>辉辉的数据库</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="加密和安全安全设计的基本原则： 使用成熟的安全系统 以小人之心度输入数据 外部系统是不安全的 最小授权 减少外部接口 缺省使用安全模式 安全不是似是而非 从假冒、篡改、否认、信息泄露、拒绝服务、提升权限方面思考 在入口处检查 从管理上保护好你的系统  常用的安全技术： 认证 授权 审计 安全通信  加密算法：1.对称式加密：加密和解密使用同一个密钥 特性：  加密、解密使用同一个密钥，效率高 将原">
+<meta property="og:type" content="article">
+<meta property="og:title" content="辉辉的数据库">
+<meta property="og:url" content="http://example.com/2020/11/18/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/index.html">
+<meta property="og:site_name" content="辉辉的数据库">
+<meta property="og:description" content="加密和安全安全设计的基本原则： 使用成熟的安全系统 以小人之心度输入数据 外部系统是不安全的 最小授权 减少外部接口 缺省使用安全模式 安全不是似是而非 从假冒、篡改、否认、信息泄露、拒绝服务、提升权限方面思考 在入口处检查 从管理上保护好你的系统  常用的安全技术： 认证 授权 审计 安全通信  加密算法：1.对称式加密：加密和解密使用同一个密钥 特性：  加密、解密使用同一个密钥，效率高 将原">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200903201235406.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200904200647617.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200908111325630.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200908111546508.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200908111644761.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200908111700029.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200908172447757.png">
+<meta property="article:published_time" content="2020-11-18T13:08:14.256Z">
+<meta property="article:modified_time" content="2020-11-01T08:06:31.571Z">
+<meta property="article:author" content="huihui">
+<meta property="article:tag" content="notes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200903201235406.png">
+  
+    <link rel="alternate" href="/atom.xml" title="辉辉的数据库" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">辉辉的数据库</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">我们要丈量大地！</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-加密和安全" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/11/18/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" class="article-date">
+  <time class="dt-published" datetime="2020-11-18T13:08:14.256Z" itemprop="datePublished">2020-11-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="加密和安全"><a href="#加密和安全" class="headerlink" title="加密和安全"></a>加密和安全</h3><h4 id="安全设计的基本原则："><a href="#安全设计的基本原则：" class="headerlink" title="安全设计的基本原则："></a>安全设计的基本原则：</h4><ul>
+<li>使用成熟的安全系统</li>
+<li>以小人之心度输入数据</li>
+<li>外部系统是不安全的</li>
+<li>最小授权</li>
+<li>减少外部接口</li>
+<li>缺省使用安全模式</li>
+<li>安全不是似是而非</li>
+<li>从假冒、篡改、否认、信息泄露、拒绝服务、提升权限方面思考</li>
+<li>在入口处检查</li>
+<li>从管理上保护好你的系统</li>
+</ul>
+<h4 id="常用的安全技术："><a href="#常用的安全技术：" class="headerlink" title="常用的安全技术："></a>常用的安全技术：</h4><ul>
+<li>认证</li>
+<li>授权</li>
+<li>审计</li>
+<li>安全通信</li>
+</ul>
+<h4 id="加密算法："><a href="#加密算法：" class="headerlink" title="加密算法："></a>加密算法：</h4><p><strong>1.对称式加密</strong>：加密和解密使用同一个密钥</p>
+<p>特性：</p>
+<ul>
+<li>加密、解密使用同一个密钥，效率高</li>
+<li>将原始数据分割成固定大小的块，逐个进行加密</li>
+</ul>
+<p>缺陷：</p>
+<ul>
+<li>密钥过多</li>
+<li>密钥分发</li>
+<li>数据来源无法确认</li>
+</ul>
+<p>常见对称加密算法：DES、3DES、AES、Blowfish、IDEA</p>
+<p><strong>2.非对称式加密：公钥，私钥成对出现</strong></p>
+<ul>
+<li>公钥：public key，公开给所有人，主要给别人加密使用</li>
+<li>私钥：secret key，private key自己留存，必须保证其私密性，用于自己加密签名</li>
+</ul>
+<p>特点：</p>
+<ul>
+<li>用公钥加密数据，只能使用与之对应的私钥进行解密；反之亦然</li>
+</ul>
+<p>功能：</p>
+<ul>
+<li>数字加密：适合加密较小数据，比如：加密对称加密密钥</li>
+<li>数字签名：主要在于让接收方确认发送方身份</li>
+</ul>
+<p>缺陷：</p>
+<ul>
+<li>密钥长，算法复杂</li>
+<li>加密效率低下</li>
+</ul>
+<p>公钥私钥的异同：</p>
+<ul>
+<li>公钥和私钥是通过非对称性加密算法同时得到的一对密钥</li>
+<li>公钥和私钥是彼此的唯一，只有他们彼此可以解开彼此</li>
+<li>公钥一般是发送给其他人的，私钥是自己保存的</li>
+<li>公钥一般用于其他主机加密消息，私钥多用于解密公钥加密的、其他主机发送来的消息</li>
+</ul>
+<p>常见非对称加密算法：RSA、DSA、ECC</p>
+<p><strong>gpg命令：</strong></p>
+<p>gpg实现对称加密文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gpg -c file #加密，加密后生成file.gpg文件</span><br><span class="line">gpg -o file -d file.gpg #解密，-d后面是加密后的文件，-o后面是解密成什么名字的文件</span><br></pre></td></tr></table></figure>
+
+<p>gpg实现非对称式加密：以A,B两台主机之间加密传输文件为例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">gpg --gen-key #A主机生成密钥对，需要设置密钥的身份信息</span><br><span class="line">gpg --list-keys #查看A主机上的密钥</span><br><span class="line">gpg -a --export -o lv.pubkey #在A主机上导出公钥lv.pubkey</span><br><span class="line">将公钥发送给B主机</span><br><span class="line">gpg --import lv.pubkey #将公钥导入B主机</span><br><span class="line">gpg --list-keys #查看B主机上的密钥</span><br><span class="line">gpg -e -r lv filename #利用A的公钥lv.pubkey加密文件，生成filename.gpg文件</span><br><span class="line">将加密好的文件发送给A主机</span><br><span class="line">gpg -d filename.gpg #在A主机解密文件，这时候自动匹配使用A的私钥解密</span><br><span class="line">gpg --delete-keys lv #删除公钥</span><br><span class="line">gpg --delete-secret-keys lv #删除私钥</span><br></pre></td></tr></table></figure>
+
+<p><strong>3.单向哈希算法</strong></p>
+<p>哈希算法，也称为散列算法，将任意数据缩小成固定大小的“指纹”，称为digest，即摘要</p>
+<p>特性：</p>
+<ul>
+<li>任意长度输入，固定长度输出</li>
+<li>若修改数据，指纹也会改变，且具有雪崩效应，数据的一点微小改变，生成的指纹值变化非常大</li>
+<li>无法从指纹中重新生成数据，即不可逆，具有单向性</li>
+</ul>
+<p>功能：检验数据完整性</p>
+<p>常见算法：md5：128bits、sha1:160bits、sha224、sha256、sha384、sha512</p>
+<p>常用工具：</p>
+<ul>
+<li>MD5sum | sha1sum [ –check ] file</li>
+<li>openssl、gpg</li>
+<li>rpm -V</li>
+</ul>
+<h5 id="4-数字签名："><a href="#4-数字签名：" class="headerlink" title="4.数字签名："></a><strong>4.数字签名：</strong></h5><p>数字签名是指：使用非对称加密算法加密了通过哈希算法得出的摘要。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">主机A，主机B</span><br><span class="line">主机A发送数据包data给主机B</span><br><span class="line">主机A首先对data使用哈希算法，得到摘要D</span><br><span class="line">然后使用非对称加密算法加密摘要D（使用A的私钥），得到签名S  #这个S就是数字签名</span><br><span class="line">这个时候主机A把data和S一起发送出去</span><br><span class="line">主机B接收到data和S</span><br><span class="line">主机B先对data使用哈希算法，得到D1</span><br><span class="line">主机B再使用主机A的公钥解密S，得到D</span><br><span class="line">主机B对比D和D1，如果D和D1相同，那么数据包data就是从主机A发送出来的，且数据没有被修改过；如果D和D1不同，那么数据就被修改过。</span><br></pre></td></tr></table></figure>
+
+<p><strong>5.密钥交换：</strong></p>
+<p>使用DH算法，可以让A,B主机得到安全的对称密钥。</p>
+<h4 id="CA和证书"><a href="#CA和证书" class="headerlink" title="CA和证书"></a>CA和证书</h4><p>涉及几个名词概念：</p>
+<p><strong>根CA：最高级CA，内置在操作系统中，是微软认为安全的CA</strong></p>
+<p>CA：Certificate Authority  发证书权威–&gt;证书颁发机构</p>
+<p>中间人：指站在网络通信双方之间拦截信息的人，</p>
+<p>证书：我理解的证书就是签名，身份证件，就是用你自己的私钥加密的文件，能让别人用你的公钥解开，让别人知道这个数据是来自于你的。能提供这个功能的数据就是证书。</p>
+<h5 id="CA的流程："><a href="#CA的流程：" class="headerlink" title="CA的流程："></a><strong>CA的流程：</strong></h5><p>互联网中有很多公钥，你不会随便相信你接收到的A的公钥是真正A的公钥，就像你不会相信一张用A4纸写的身份证是真的一样，所以出现了CA，类似于公安局，它可以给出权威证明，就像身份证一样，你在发送数据时附带上这个证件，别人就知道收到的数据真的是来自于你的，你也可以通过别人数据中附带的证书知道，你收到的数据真的是某某某发送来的。</p>
+<p>这里面还有个信任问题：你信任CA1，小红信任CA2，但是你不信任CA2，小红不信任CA1，那你们是不能建立信任连接的。这个时候就需要一个大家都信任的根CA，它给CA1和CA2发证书，证明他们都是可信的，那么你和小红就能通过根CA，建立起信任。<strong>这个根CA是怎么让大家都信任的呢？它内置在操作系统中。</strong>这个就是微软自己认为一定安全的CA，那么我就把它内置在操作系统中，这样用户默认就信任这个CA了，然后通过这个CA给其他小CA发放的证书，我们就能知道其他CA是否可信任了，这样就解决了中间人问题。<strong>（还是通过公钥私钥的解密来确认的，如果小CA的证书能够通过根CA的公钥解密了，那么它一定可信）</strong></p>
+<p><strong>安全协议：SSL/TLS</strong>：</p>
+<p>SSL：Secure Socket Layer</p>
+<p>TLS：Transport Layer Security</p>
+<p>这个协议是在传输层和应用层中间</p>
+<h5 id="HTTPS的工作流程"><a href="#HTTPS的工作流程" class="headerlink" title="HTTPS的工作流程"></a><strong>HTTPS的工作流程</strong></h5><p>HTTPS协议：HTTP协议和SSL/TLS协议的组合。对HTTP协议的文本数据进行加密处理后，称为二进制形式传输</p>
+<p><strong>注意：HTTPS的传输中只要求服务器端有证书（公钥），客户端不需要</strong></p>
+<p>HTTPS的工作流程：</p>
+<ul>
+<li>客户端发起HTTPS请求，用户在浏览器输入https网址，然后连接到服务器的443端口</li>
+<li>服务器端收到请求后，发送携带有可以证明自己身份的公钥（证书）给客户端</li>
+<li>客户端接收到数据后，将会通过TLS协议验证证书的有效性，比如颁发机构、过期时间等信息，如果发现异常，就会弹出警告框，提示证书存在问题；如果证书没有问题，那么就生成一个随机值，然后用证书中的服务器公钥对随机值进行加密（非对称加密）</li>
+<li>客户端将加密信息发送给服务器端，这一步的目的就是让服务器端得到这个随机值，以后客户端和服务器端的通信就可以通过这个随机值来进行加密解密了</li>
+<li>服务器端解密信息。服务器端收到数据后，使用自己的私钥进行解密，得到了客户端传来的随机值</li>
+<li>服务器端将数据利用这个随机值进行对称加密，再发送给客户端</li>
+<li>客户端接收并用随机值解密，获取解密后的数据内容</li>
+<li>上面提到的随机值应该是服务器端和客户端都生成了，最后也是利用双方的随机值一起作为对称加密的密钥</li>
+</ul>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200903201235406.png" alt="image-20200903201235406"></p>
+<h4 id="OpenSSL"><a href="#OpenSSL" class="headerlink" title="OpenSSL"></a>OpenSSL</h4><p>1.OpenSSL介绍：</p>
+<ul>
+<li><p>OpenSSL是一个开源项目，密码学和SSL/TLS 工具箱</p>
+</li>
+<li><p>包括三个组件</p>
+<ul>
+<li>libcrypto：用于实现加密和解密的库</li>
+<li>libssl：用于实现ssl通信协议的安全库</li>
+<li>openssl：多用途命令行工具</li>
+</ul>
+</li>
+</ul>
+<h5 id="Base64编码"><a href="#Base64编码" class="headerlink" title="Base64编码"></a>Base64编码</h5><p>Base64编码是一种常用于传输8bit字节码的编码方式，它基于64个可打印的字符来表示二进制数据。</p>
+<p>平时的数据中会存在大量的乱码，这就是因为二进制组成了不可打印的字符，导致显示异常，用64个可以打印的字符去表示他们就会显示正常，只不过显示出来的不是数据原本的样子。</p>
+<p>64个字符就是需要表示64个数，用二进制来表示需要6位，所以Base64是以6位为一个单位来传输数据的。Base64就是将数据看成一长串二进制，然后每6位一组去表示一个字符，破坏原来的8位字节结构，位数不够了就补零。</p>
+<p>而由于计算机的发展历史，存储数据的基本单位是bite，它是8位（ASCII规定的，因为8位就可以安排完所有的英文字母数字符号），所以Base64的6位表示和一个字节的8位表示会导致有些字符在表示时需要去填充0才能显示正常，这样的表示需要用“=”表示出来。要看一个Base64表示的数据中有没有“=”，就看这个：6和8的最小公倍数是24，也就是3个字节，如果要表示的数据的字节长度是3的倍数，那么Base64表示出来的数据中就没有“=”；如果不是3的倍数，那么被3整除之后，余数是几就要写几个“=”，当然，最多两个。</p>
+<p>Base64的64个字符</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200904200647617.png" alt="image-20200904200647617"></p>
+<h5 id="OpenSSL命令："><a href="#OpenSSL命令：" class="headerlink" title="OpenSSL命令："></a>OpenSSL命令：</h5><p>两种运行模式：</p>
+<ul>
+<li>交互模式</li>
+<li>批处理模式</li>
+</ul>
+<p>三种子命令：</p>
+<ul>
+<li>标准命令</li>
+<li>消息摘要命令</li>
+<li>加密命令</li>
+</ul>
+<p>OpenSSL的使用：</p>
+<p>1.OpenSSL命令实现对称加密和解密</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#加密</span><br><span class="line">openssl enc -e -des3 -a -salt -in testfile -out testfile.cipher</span><br><span class="line">#解密</span><br><span class="line">openssl enc -d -des3 -a -salt -in testfile.cipher -out testfile</span><br></pre></td></tr></table></figure>
+
+<p>2.OpenSSL命令实现哈希加密</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl md5 filename</span><br><span class="line">openssl sha512 filename</span><br><span class="line">sha512sum filename</span><br></pre></td></tr></table></figure>
+
+<p>3.OpenSSL命令生成用户密码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl passwd -6 -salt Y16DiwuVqtl5xcqk </span><br><span class="line">echo lvzhehui | openssl passwd -6 -salt Y16DiwuVqtl5xcqk -stdin</span><br></pre></td></tr></table></figure>
+
+<p>范例：创建新用户同时指定密码，在Centos和Ubuntu都通用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useradd -p &#96;echo lvzhehui | openssl passwd -6 -salt Y16DiwuVqtl5xcqk -stdin&#96; lv</span><br></pre></td></tr></table></figure>
+
+<p>4.OpenSSL生成随机数</p>
+<p>随机数生成器：伪随机数字，利用键盘和鼠标，块设备中断生成随机数</p>
+<p>/dev/random：仅从熵池返回随机数，随机数用尽就没了，需要等待，阻塞</p>
+<p>/dev/urandom：从熵池返回随机数，随机数用尽，会利用软件生成伪随机数，不会阻塞</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">openssl rand -base64 NUM</span><br><span class="line">#NUM指的是几个字节，注意如果这个字节数不是3的倍数，后面会有等号</span><br><span class="line">openssl rand -base64 NUM | head -c xx</span><br><span class="line">#通过head -c 命令取出前面不带等号的部分</span><br><span class="line">其他的生成随机数的方法：</span><br><span class="line">cat &#x2F;dev&#x2F;urandom | tr -dc &#39;[:alnum:]&#39; | head -c 10 </span><br><span class="line">mkpasswd -l 10 </span><br></pre></td></tr></table></figure>
+
+<p>5.OpenSSL命令实现PKI，公共密钥加密体系，也就是非对称加密</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out filename.key 2048</span><br><span class="line">#加上umask后，保证这个密钥的安全性，这样写也更具有通用性</span><br><span class="line">(umask 077;openssl genrsa -out filename.key 2048)</span><br><span class="line">#使用对称密钥再加密一下这个生成的密钥</span><br><span class="line">(umask 077;openssl genrsa -out filename.key -des3 2048)</span><br><span class="line">#从私钥中提取出公钥</span><br><span class="line">openssl rsa -in filename.key -pubout -out filename.key.pub</span><br><span class="line">#解密私钥 ？</span><br><span class="line">openssl rsa -in app.key -out app.key</span><br></pre></td></tr></table></figure>
+
+<h5 id="建立私有CA实现证书申请颁发"><a href="#建立私有CA实现证书申请颁发" class="headerlink" title="建立私有CA实现证书申请颁发"></a>建立私有CA实现证书申请颁发</h5><p>建立私有CA：</p>
+<ul>
+<li>OpenCa：OpenCa开源组织使用Perl对OpenSSL进行二次开发而成的一套完善的PKI免费软件</li>
+<li>openssl：相关包openssl和openssl-libs</li>
+</ul>
+<p>证书申请及签署步骤：</p>
+<p>​    1.生成证书申请请求</p>
+<ol start="2">
+<li><p>CA核验</p>
+<ol start="3">
+<li>CA签署</li>
+<li>获取证书</li>
+</ol>
+</li>
+</ol>
+<p>openssl的配置文件，这里规定了申请证书时的一些要求，可以人为修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;etc&#x2F;pki&#x2F;tls&#x2F;openssl.cnf</span><br></pre></td></tr></table></figure>
+
+<p>在这个配置文件中有三种策略：match–匹配、optional–可选、supplied–提供</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">match：要求申请填写的信息与CA设置信息必须一致</span><br><span class="line">optional：可有可无，跟CA设置可以不一样</span><br><span class="line">supplied：必须填写这项申请信息</span><br></pre></td></tr></table></figure>
+
+<p>需要用到的命令</p>
+<ul>
+<li>生成私钥文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out xxx.pem </span><br><span class="line">注意，CA自己的密钥后缀写了pem，客户端生成密钥写了key</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>颁发证书</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#这个是自签名证书，CA给自己的颁发的命令</span><br><span class="line">openssl req -new -x509 -key xxxx.pem -days xx -out xxx.pem</span><br><span class="line">#这个是客户端申请时候用到命令，客户端这个命令只能生成申请，颁发还有一条CA的命令</span><br><span class="line">openssl req -new -key xxx.key -out xxx.csr</span><br><span class="line">#这个命令是CA的，CA根据客户端的.csr文件生成一个.crt文件，这才是客户端要的证书</span><br><span class="line">openssl ca -in xxx.csr -out xxx.crt -days xx</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>查看证书文件的命令</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -in xxx.pem  -noout -text </span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="创建私有CA的具体操作："><a href="#创建私有CA的具体操作：" class="headerlink" title="创建私有CA的具体操作："></a>创建私有CA的具体操作：</h5><p>1.创建CA所需要的文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#根据&#x2F;etc&#x2F;pki&#x2F;tls&#x2F;openssl.cnf配置文件的要求，生成这几个文件夹</span><br><span class="line">mkdir -pv &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;&#123;certs,crl,newcerts,private&#125;</span><br><span class="line">#根据openssl.cnf生成文件，这里是CA的数据库，存放证书的编号、是否有效等信息</span><br><span class="line">touch &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;index.txt</span><br><span class="line">#根据openssl.cnf生成序列号文件，serial，里面写上自己设定的证书起始序号，序号是16进制表示的</span><br><span class="line">echo 01 &gt; &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;serial</span><br><span class="line">#根据openssl.cnf生成吊销序号文件，crlnumber，同serial，只不过存放的是吊销序列</span><br><span class="line">echo 01 &gt; &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;crlnumber</span><br></pre></td></tr></table></figure>
+
+<p>2.生成CA私钥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(umask 066;openssl genrsa -out &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;private&#x2F;cakey.pem 2048) </span><br></pre></td></tr></table></figure>
+
+<p>3.生成CA自签名证书</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -x509 -key &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;private&#x2F;cakey.pem -days 3650 -out &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;cacert.pem</span><br><span class="line">然后填写一些选项，CA就自建完成了</span><br></pre></td></tr></table></figure>
+
+<h5 id="申请证书和颁发证书："><a href="#申请证书和颁发证书：" class="headerlink" title="申请证书和颁发证书："></a>申请证书和颁发证书：</h5><p>注意：本来在规则中，申请证书是客户端自己先生成自己的公钥和私钥后，把申请发送给CA，CA再去认证，然后颁发证书，但是在自建CA中，在CA的服务器上就直接生成客户端的公钥私钥了，然后直接自己认证，颁发证书，然后把证书和私钥一起发送给客户端。具体怎么用还没学习，目前了解的情况是这样。下面的步骤就是在CA服务器上做的</p>
+<p>1.为需要使用证书的主机生成私钥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(umask 066;openssl genrsa -out &#x2F;data&#x2F;app.key 2048)</span><br></pre></td></tr></table></figure>
+
+<p>2.为需要使用证书的主机生成证书申请文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -key &#x2F;data&#x2F;app&#x2F;app.key -out &#x2F;data&#x2F;app&#x2F;app.csr</span><br><span class="line">需要填写一些信息，注意这些信息中按照openssl.cnf的要求，有些选项必须跟CA自签名证书一样</span><br></pre></td></tr></table></figure>
+
+<p>3.在CA签署证书并将证书颁发给申请者</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl ca -in &#x2F;data&#x2F;app&#x2F;app.csr -out &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;certs&#x2F;app.crt -days 1000</span><br><span class="line">这一步就生成了用户的证书，需要按两次确认 y</span><br></pre></td></tr></table></figure>
+
+<p>4.查看证书中的信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#这个是通用的命令，可以查看pem和crt文件信息</span><br><span class="line">openssl x509 -in filename.pem -noout -text</span><br><span class="line">#这个选项后面的 -text选项可以换成 -issuer -subject -dates -serial 这些具体的，-text是全部信息</span><br></pre></td></tr></table></figure>
+
+<p>5.验证指定编号证书的有效性</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">openssl ca -status NUM</span><br><span class="line">显示出来的信息中，Valid(V)是有效，Revoked(R)是无效</span><br><span class="line">查看数据库文件index.txt文件</span><br><span class="line">cat &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;index.txt</span><br><span class="line">这里面也有有效无效信息</span><br></pre></td></tr></table></figure>
+
+<p>6.把证书发送给客户端使用，注意之前生成的密钥也得发送，文件夹里应该有三个文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cp &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;certs&#x2F;app.crt &#x2F;data&#x2F;app&#x2F;</span><br><span class="line">tree &#x2F;data&#x2F;app&#x2F;</span><br><span class="line">.</span><br><span class="line">├── app1.crt</span><br><span class="line">├── app1.csr</span><br><span class="line">└── app1.key</span><br><span class="line">要发这三个一起发了</span><br></pre></td></tr></table></figure>
+
+<h5 id="吊销证书："><a href="#吊销证书：" class="headerlink" title="吊销证书："></a>吊销证书：</h5><p>1.在客户端获取要吊销的证书的serial</p>
+<p>2.在CA上，根据客户提交额serial与subject信息，对比检验是否与index.txt文件中的信息一致，吊销证书</p>
+<p>3.指定第一个吊销证书的编号，注意：第一次更新证书吊销列表前，才需要执行</p>
+<p>4.更新证书吊销列表</p>
+<p>5.查看crl文件</p>
+<p>涉及到的命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#吊销编号01的证书</span><br><span class="line">openssl ca -revoke &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;newcerts&#x2F;01.pem</span><br><span class="line">#查看01证书的状态</span><br><span class="line">openssl ca -status 01</span><br><span class="line">#生成吊销证书列表</span><br><span class="line">openssl ca -gencrl -out &#x2F;etc&#x2F;pki&#x2F;CA&#x2F;crl.pem</span><br><span class="line">#查看吊销证书列表</span><br><span class="line">openssl crl -in crl.pem -noout -text</span><br></pre></td></tr></table></figure>
+
+<h4 id="SSH服务"><a href="#SSH服务" class="headerlink" title="SSH服务"></a>SSH服务</h4><h5 id="ssh介绍"><a href="#ssh介绍" class="headerlink" title="ssh介绍"></a>ssh介绍</h5><p>ssh：secure shell  ，protocol，22/tcp，安全的远程登录，实现加密通信，代替传统的Telnet协议</p>
+<p>具体的软件实现：</p>
+<ul>
+<li>Openssh：ssh协议的开源实现，centos默认安装</li>
+<li>dropbear：另一个ssh协议的开源项目的实现</li>
+</ul>
+<p>SSH协议版本</p>
+<ul>
+<li>v1：基于CRC-32做MAC，不安全；man-in-middle</li>
+<li>v2：双方主机协议选择安全的MAC方式，基于DH算法做密钥交换，基于RSA或DSA实现身份认证</li>
+</ul>
+<p>SSH协议连接与HTTPS，SSL/TLS等存在一个区别，那就是它的连接过程中没有CA，所以它第一次建立连接的时候有些特殊，它无法确认服务器和客户端公钥是否是真的，只能通过在ssh远程连接时发出提醒信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The authenticity of host &#39;ssh-server.example.com (12.18.429.21)&#39; can&#39;t be established.</span><br><span class="line">RSA key fingerprint is 98:2e:d7:e0:de:9f:ac:67:28:c2:42:2d:37:16:58:4d.</span><br><span class="line">Are you sure you want to continue connecting (yes&#x2F;no)?</span><br></pre></td></tr></table></figure>
+
+<p><strong>这里面RSA key fingerprint 就是服务器公钥使用哈希算法得出的值，我们需要直接物理登录服务器，看服务器的公钥使用哈希算法之后得出的值是不是跟这个相等，从而判断真实性，这就是它第一次建立连接时的安全考虑。</strong></p>
+<p><strong>SSH首次建立链接</strong></p>
+<ul>
+<li>客户端发起链接请求</li>
+<li>服务器端接收到请求后把自己的公钥和一个会话ID发送给客户端</li>
+<li>客户端收到服务器消息后，得出了服务器端公钥</li>
+<li>客户端也有自己的密钥对</li>
+<li>客户端用自己的公钥异或会话ID，计算出一个值Res，并用服务端的公钥加密</li>
+<li>客户端发送加密后的值到服务器，服务端用私钥解密，得到Res</li>
+<li>服务端用解密后的值Res异或会话ID，计算出客户端的公钥</li>
+<li>最终，客户端和服务器端都有三个密钥，自己的公钥，自己的私钥，彼此的公钥。</li>
+<li>之后所有的通讯都会被公钥加密</li>
+</ul>
+<p><strong>SSH建立链接后的通讯</strong></p>
+<ul>
+<li>客户端使用服务器端的公钥加密数据，发送给服务器端</li>
+<li>服务器端收到数据后，使用自己的私钥解密，得到数据</li>
+<li>服务器端使用客户端的公钥加密数据，然后发送给客户端</li>
+<li>客户端收到数据后，使用自己的私钥解密，得到数据</li>
+</ul>
+<p><strong>SSH和HTTPS的区别：</strong></p>
+<ul>
+<li>HTTPS协议是需要CA的，更安全，SSH协议没有CA，需要物理确认公钥的真实性</li>
+<li>HTTPS协议中客户端不需要公钥和证书，SSH协议客户端也要公钥</li>
+<li>HTTPS建立连接后传输数据是用变化的对称密钥加密数据的，SSH协议建立连接后是通过双方的公钥加密数据的，同时也有对称密钥加密。</li>
+</ul>
+<h5 id="Openssh服务"><a href="#Openssh服务" class="headerlink" title="Openssh服务"></a>Openssh服务</h5><p>Openssh是SSH协议的免费开源实现，一般在各种Linux版本中会默认安装，基于C/S结构。</p>
+<p>Openssh软件相关包：</p>
+<ul>
+<li>openssh</li>
+<li>openssh-clients</li>
+<li>openssh-server</li>
+</ul>
+<p>涉及到的文件路径：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;etc&#x2F;ssh&#x2F;  #这里存放了公钥和私钥</span><br><span class="line">&#x2F;etc&#x2F;ssh&#x2F;ssh_config   #这个是ssh的配置文件</span><br></pre></td></tr></table></figure>
+
+<p>客户端ssh命令</p>
+<p>1.修改/etc/ssh/ssh_config文件中的选项，可以取消</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">原来是</span><br><span class="line">#   StrictHostKeyChecking ask</span><br><span class="line">修改成</span><br><span class="line">StrictHostKeyChecking no</span><br><span class="line">这样可以取消首次登陆显示检查提示</span><br></pre></td></tr></table></figure>
+
+<p>ssh [user@] host [COMMAND]</p>
+<p>ssh常用选项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-p port 指定远程服务器端口</span><br><span class="line">-t 强制伪tty分配，这个可以做到一条命令跳着连接</span><br></pre></td></tr></table></figure>
+
+<p>ssh -t 10.0.0.3 ssh -t 10.0.0.7 -t 10.0.0.5<br>然后输入三次密码</p>
+<p>范例：在远程主机运行本地shell脚本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh 10.0.0.4 &#x2F;bin&#x2F;bash &lt; test.sh</span><br></pre></td></tr></table></figure>
+
+<p>ssh登陆验证方式</p>
+<ul>
+<li>用户/口令</li>
+<li>基于密钥</li>
+</ul>
+<p>1.用户/口令</p>
+<ul>
+<li>客户端发起ssh请求，服务器会把自己的公钥发送给用户</li>
+<li>用户会根据服务器发来的公钥对密码进行加密</li>
+<li>加密后的信息回传给服务器，服务器用自己的私钥解密，如果密码正确，则用户登录成功</li>
+</ul>
+<p>2.基于密钥</p>
+<ul>
+<li>客户端已经有公钥和私钥</li>
+<li>客户端主动把公钥ssh-copy-id拷贝到服务端</li>
+<li>当客户端发送一个连接请求给服务器端，服务器端会去autuorized_keys中查找，如果有相应的IP和用户名，就会随机生成一个字符串</li>
+<li>服务器端将使用客户端拷贝过来的公钥对数据进行加密，然后发送给客户端</li>
+<li>客户端收到数据后，使用自己的私钥解密，然后将解密的字符串发送给服务器端</li>
+<li>服务器端收到客户端发送来的字符串后，跟之前的字符串对比，如果一致就允许免密码登录</li>
+</ul>
+<p>实现基于密钥的登录方式</p>
+<p>在客户端生成密钥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa [-P &#39;passwd&#39;] [-f &quot;~&#x2F;.ssh&#x2F;id_rsa&quot;]</span><br><span class="line">-t 是指定算法，不写就默认是rsa算法</span><br><span class="line">-P 是指定之前加密密钥的密码，没有就不写或者空</span><br><span class="line">-f 是指定密钥的文件，不写就默认是~&#x2F;.ssh&#x2F;id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>把公钥文件传输至远程服务器对应用户的家目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-copy-id [-i [identify_file]] [user@]host</span><br></pre></td></tr></table></figure>
+
+<p>重设私钥口令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -p</span><br></pre></td></tr></table></figure>
+
+<p>验证代理（authentication agent）保密解密后的密钥，口令就只要输入一次，在GNOME中，代理被自动提供给root用户</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#启用代理</span><br><span class="line">ssh-agent bash</span><br><span class="line">#钥匙通过命令添加给代理</span><br><span class="line">ssh-add</span><br></pre></td></tr></table></figure>
+
+<p>上面写的这几个命令，其实是这个关系：</p>
+<ul>
+<li>首先生成密钥对</li>
+<li>把密钥拷贝到服务端</li>
+<li>重设私钥口令这个，它是去加密之前生成的那个私钥去了，这样一来，下次在使用这个私钥的时候（也就是使用私钥解密公钥的时候–&gt;登录服务端的时候），需要输入密码</li>
+<li>这个代理更有意思，它是为了重设私钥口令服务的，开启代理，输入ssh-add，然后输入加密私钥的密码，成功之后，之后使用私钥的时候就不需要输入密码了。</li>
+</ul>
+<p><strong>一个自动登录ssh的工具：sshpass</strong></p>
+<p>这个工具在epel源中，<strong>它可以满足在一行命令中提供IP和密码，实现非交互式建立ssh连接</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sshpass [option] command parameters</span><br></pre></td></tr></table></figure>
+
+<p>常用选项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-p password #后面跟密码</span><br><span class="line">-f filename #后面跟保存密码的文件名，密码是文件内容的第一行</span><br><span class="line">-e #将环境变量SSHPASS作为密码，在脚本中提前设置好 export SSHPASS&#x3D;密码 ,然后在命令中就不用谢密码了，直接 -e</span><br><span class="line">例如：</span><br><span class="line">export SSHPASS&#x3D;centos</span><br><span class="line">sshpass -e ssh 10.0.0.3 </span><br></pre></td></tr></table></figure>
+
+
+
+<p>通过脚本批量实现多台主机的基于ssh的key验证</p>
+<p>脚本1：使用expect实现基于ssh的key的验证</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"> 1 #!&#x2F;bin&#x2F;bash</span><br><span class="line"> 2 #</span><br><span class="line"> 3 #</span><br><span class="line"> 4 #Author:    lvzhehui</span><br><span class="line"> 5 #QQ:        734709865</span><br><span class="line"> 6 #Date:      2020-09-06</span><br><span class="line"> 7 #FileName:  push_ssh_key.sh</span><br><span class="line"> 8 #Descripting:   </span><br><span class="line"> 9 #Copyright (C): 2020 All rights reserved</span><br><span class="line">10 #顺序</span><br><span class="line">11 #目的：使用脚本，自动地生成本地ssh密钥--&gt;将密钥拷贝到其他主机--&gt;循环N个主</span><br><span class="line">   机--&gt;验证是否成功</span><br><span class="line">12 rpm -q expect &amp;&gt; &#x2F;dev&#x2F;null || yum -y install expect &amp;&gt; &#x2F;dev&#x2F;null</span><br><span class="line">13 ssh-keygen -t rsa -P &quot;&quot; -f &#x2F;root&#x2F;.ssh&#x2F;id_rsa &amp;&gt; &#x2F;dev&#x2F;null &amp;&amp; echo &quot;key ha    s been created&quot; || (echo &quot;error,please check your script&quot;;exit)</span><br><span class="line">14 while read IP PASS ; do</span><br><span class="line">15 expect &amp;&gt; &#x2F;dev&#x2F;null &lt;&lt;EOF</span><br><span class="line">16 set timeout 20</span><br><span class="line">17 spawn ssh-copy-id -i &#x2F;root&#x2F;.ssh&#x2F;id_rsa root@$IP</span><br><span class="line">18 expect &#123;</span><br><span class="line">19     &quot;yes&#x2F;no&quot; &#123; send &quot;yes\n&quot;;exp_continue &#125;</span><br><span class="line">20     &quot;password&quot; &#123; send &quot;$PASS\n&quot; &#125;</span><br><span class="line">21 &#125;</span><br><span class="line">22 expect eof</span><br><span class="line">23 EOF</span><br><span class="line">24 ssh root@$IP hostname -I &lt; &#x2F;dev&#x2F;null</span><br><span class="line">25 echo $IP OK </span><br><span class="line">26 done &lt; host.txt    </span><br><span class="line"></span><br><span class="line">host.txt文件是这样的：</span><br><span class="line">1 10.0.0.5 centos                                                          </span><br><span class="line">2 10.0.0.3 centos</span><br></pre></td></tr></table></figure>
+
+<p>脚本2：通过sshpass命令来方便地批量建立基于ssh的密钥的连接</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"> 1 #!&#x2F;bin&#x2F;bash</span><br><span class="line"> 2 #</span><br><span class="line"> 3 #</span><br><span class="line"> 4 #Author:    lvzhehui</span><br><span class="line"> 5 #QQ:        734709865</span><br><span class="line"> 6 #Date:      2020-09-06</span><br><span class="line"> 7 #FileName:  push_ssh_key2.sh</span><br><span class="line"> 8 #Descripting:   </span><br><span class="line"> 9 #Copyright (C): 2020 All rights reserved</span><br><span class="line">10 HOSTS&#x3D;&#39;</span><br><span class="line">11 10.0.0.3</span><br><span class="line">12 10.0.0.5</span><br><span class="line">13 &#39;</span><br><span class="line">14 export SSHPASS&#x3D;centos</span><br><span class="line">15 rpm -q sshpass &amp;&gt; &#x2F;dev&#x2F;null  || yum -y install sshpass &amp;&gt; &#x2F;dev&#x2F;null</span><br><span class="line">16 ssh-keygen -t rsa -P &quot;&quot; -f &#x2F;root&#x2F;.ssh&#x2F;id_rsa &amp;&gt; &#x2F;dev&#x2F;null</span><br><span class="line">17 for i in $HOSTS</span><br><span class="line">18 do</span><br><span class="line">19 &#123;</span><br><span class="line">20     sshpass -e ssh-copy-id -o StrictHostKeyChecking&#x3D;no -i &#x2F;root&#x2F;.ssh&#x2F;id_rsa  root@$i &amp;&gt; &#x2F;dev&#x2F;null</span><br><span class="line">21     echo $i is ready                                                     </span><br><span class="line">22 &#125;&amp;</span><br><span class="line">23 done</span><br><span class="line">24 wait</span><br></pre></td></tr></table></figure>
+
+<p>脚本3：通过sshpass批量修改主机root密码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"> 1 #!&#x2F;bin&#x2F;bash</span><br><span class="line"> 2 #</span><br><span class="line"> 3 #</span><br><span class="line"> 4 #Author:    lvzhehui</span><br><span class="line"> 5 #QQ:        734709865</span><br><span class="line"> 6 #Date:      2020-09-06</span><br><span class="line"> 7 #FileName:  random_passwd.sh</span><br><span class="line"> 8 #Descripting:   </span><br><span class="line"> 9 #Copyright (C): 2020 All rights reserved</span><br><span class="line">10 rpm -q sshpass &amp;&gt; &#x2F;dev&#x2F;null || yum -y install sshpass &amp;&gt; &#x2F;dev&#x2F;null</span><br><span class="line">11 HOSTS&#x3D;&#39;</span><br><span class="line">12 10.0.0.3</span><br><span class="line">13 10.0.0.5</span><br><span class="line">14 &#39;</span><br><span class="line">15 export SSHPASS&#x3D;centos</span><br><span class="line">16 for i in $HOSTS</span><br><span class="line">17 do</span><br><span class="line">18 &#123;</span><br><span class="line">19     PASS&#x3D;&#96;openssl rand -base64 9&#96;                                        </span><br><span class="line">20     sshpass -e ssh -o StrictHostKeyChecking&#x3D;no $i &quot;echo $PASS | passwd --    stdin root &amp;&gt; &#x2F;dev&#x2F;null&quot;</span><br><span class="line">21     echo $i $PASS &gt;&gt; passwd.txt</span><br><span class="line">22 &#125;&amp;</span><br><span class="line">23 done</span><br><span class="line">24 wait</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>scp命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scp [option] SOURCE ...DESTINATION&#x2F;</span><br><span class="line">scp [option] [user@]host1:&#x2F;sourcepath [user@]host2:&#x2F;destpath</span><br></pre></td></tr></table></figure>
+
+<p>常用参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-C 压缩数据流</span><br><span class="line">-r 递归复制</span><br><span class="line">-p 保持原文件的属性信息</span><br><span class="line">-q 静默模式</span><br><span class="line">-p port 指定远程主机的监听端口，也就是访问端口</span><br></pre></td></tr></table></figure>
+
+<p><strong>rsync命令</strong></p>
+<p>rsync比scp更快，基于增量数据同步，是比scp更好的选择，来自于rsync包</p>
+<p>注意：通信双方都要安装rsync</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rsync -av &#x2F;etc 10.0.0.3:&#x2F;tmp</span><br><span class="line">rsync -av &#x2F;etc&#x2F; 10.0.0.3:&#x2F;tmp</span><br><span class="line">上面两个的区别：第一个会复制目录过去，第二个只复制文件内容过去</span><br></pre></td></tr></table></figure>
+
+<p>常用选项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">-a 存档，禁忌的七重奏，相当于 -rlptgoD,但是不保留ACL和SELinux属性 -A和-X</span><br><span class="line">-v 显示详细过程</span><br><span class="line">-r 递归复制</span><br><span class="line">-p 保留权限</span><br><span class="line">-t 保留修改时间戳</span><br><span class="line">-g 保留组信息</span><br><span class="line">-o 保留所有者信息</span><br><span class="line">-l 将软链接文件本身进行复制</span><br><span class="line">-L 将软链接文件指向的文件复制</span><br><span class="line">-u 如果接受者的文件比发送者的文件新，将忽略同步</span><br><span class="line">-z 压缩，节约带宽</span><br><span class="line">--delete 源数据删除，目标数据也得同步删除，这个是保证双方文件一致的好金坷垃</span><br></pre></td></tr></table></figure>
+
+<h5 id="ssh的端口转发功能"><a href="#ssh的端口转发功能" class="headerlink" title="ssh的端口转发功能"></a><strong>ssh的端口转发功能</strong></h5><p>ssh除了本身的安全通讯功能，还有更好的一个功能，它可以将其他TCP端口的数据通过SSH链接来转发，并且自动提供了相应的加密及解密服务，这个叫隧道（tunneling）。</p>
+<p>ssh端口转发能够提供两大功能：</p>
+<ul>
+<li>加密SSH Client 端至 SSH Server 端之间的通讯数据</li>
+<li>突破防火墙的限制完成一些之前无法建立的TCP连接</li>
+</ul>
+<p>1.SSH本地端口转发：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ssh -L localport:remotehost:remotehostport sshserver</span><br><span class="line">选项：</span><br><span class="line">-f 后台打开</span><br><span class="line">-N 不打开远程shell，处于等待状态</span><br><span class="line">-g 启用网关功能</span><br></pre></td></tr></table></figure>
+<p>例如：发送到本地127.0.0.1:9999端口的数据，都会被ssh隧道转发到10.0.0.4主机上，然后10.0.0.4再建立与10.0.0.3:23的Telnet通讯，这就是本地端口转发。</p>
+<p>10.0.0.4和10.0.0.3可以是防火墙里面的同一内网的主机，他们之间的通讯被认为是相对安全的。本地主机10.0.0.5被认为是在互联网上，只允许通过ssh的端口和防火墙内特定主机通讯。</p>
+<p><strong>哪边建立连接的端口是22，哪边就是服务端</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">这个命令是在防火墙外面的主机10.0.0.5上敲的，9999端口是10.0.0.5的端口，这里需要默认这个主机跟防火墙里面的10.0.0.4主机可以通过ssh连接</span><br><span class="line">在本地端口转发中，ssh的客户端是防火墙外面的10.0.0.5，服务端是10.0.0.4</span><br><span class="line">ssh -fNL 9999:10.0.0.3:23 10.0.0.4</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200908111325630.png" alt="image-20200908111325630"></p>
+<p>2.SSH远程端口转发：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">这个命令是在防火墙里面的10.0.0.4上敲的，从防火墙里面往外面更好连接，端口9999是防火墙外面主机的，10.0.0.3:80是最终想要访问的地址端口，10.0.0.5是防火墙外面的主机的地址。</span><br><span class="line">在远程端口转发中，ssh的客户端是防火墙里的10.0.0.4，服务端是防火墙外面的10.0.0.5</span><br><span class="line">ssh -fNR 9999:10.0.0.3:80 10.0.0.5</span><br></pre></td></tr></table></figure>
+<p>下面的命令加上-g，就会监听所有IP地址，0.0.0.0:9999 不仅仅是本机地址，127.0.0.1：9999</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">这里修改网关功能是修改的10.0.0.5，也就是防火墙外面的主机的</span><br><span class="line">vim &#x2F;etc&#x2F;ssh&#x2F;sshd_config</span><br><span class="line">找到#Gatewayports</span><br><span class="line">修改为Gatewayports yes，这样就打开了网关功能，让其他主机也可以通过你的IP地址加端口访问原来不能访问的地址</span><br><span class="line">ssh -fNgR 9999:10.0.0.3:80 10.0.0.5</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200908111546508.png" alt="image-20200908111546508"></p>
+<p><strong>注意这个图片里面有一点问题，这里的SSH隧道应该是从里往外的</strong></p>
+<p>3.SSH动态端口转发：</p>
+<p>-D  的意思就是通过本地的9999端口出去的数据发送到10.0.0.4之后，会按照数据中的地址去访问原来访问不了的地址，不会规定具体访问IP和端口，具体访问什么端口、什么IP，只要10.0.0.4能访问的，就都能访问，这也是科学上网的原理</p>
+<p>下面的命令是在本机上敲的，不是在VPS上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -fND 9999 10.0.0.4</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -fNDg 9999 10.0.0.4</span><br></pre></td></tr></table></figure>
+
+<img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200908111644761.png" alt="image-20200908111644761" style="zoom:150%;" />
+
+<p>例子：通过SSH实现科学上网</p>
+<p>本地地址：10.0.0.5，VPS地址：10.0.0.4，这个命令是在VPS上敲的，这里默认本机可以正常与VPS建立SSH连接，然后VPS自己开网关路由功能，需要访问外网的时候，只需要去访问VPS10.0.0.4的9999端口，VPS就会代理你去访问外网</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -fNgD 9999 10.0.0.4</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200908111700029.png" alt="image-20200908111700029"></p>
+<p>4.X协议转发</p>
+<p>下载一个可以有图形的软件，比如浏览器，然后</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export DISPLAY&#x3D;你的IP:0.0</span><br><span class="line">firefox</span><br></pre></td></tr></table></figure>
+
+<h5 id="ssh服务配置"><a href="#ssh服务配置" class="headerlink" title="ssh服务配置"></a>ssh服务配置</h5><p>配置文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;etc&#x2F;ssh&#x2F;sshd_config #服务端配置文件</span><br><span class="line">&#x2F;etc&#x2F;ssh&#x2F;ssh_config #客户端配置文件</span><br><span class="line">这两个文件都很有作用，具体看需要配什么就去具体查一下，这里主要说服务端配置</span><br></pre></td></tr></table></figure>
+
+<p>查看sshd的日志：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">taif -f &#x2F;var&#x2F;log&#x2F;secure</span><br></pre></td></tr></table></figure>
+
+<p>为了提高ssh连接速度，可以修改一下这两个选项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GSSAPIAuthentication yes</span><br><span class="line">#UseDNS yes</span><br><span class="line">改成：</span><br><span class="line">GSSAPIAuthentication no</span><br><span class="line">UseDNS no</span><br></pre></td></tr></table></figure>
+
+<p>ssh服务的建议操作：</p>
+<ul>
+<li>使用非默认端口</li>
+<li>限制可登陆用户</li>
+<li>设定空闲会话超时时间</li>
+<li>利用防火墙设置ssh访问策略</li>
+<li>仅监听特定的IP地址</li>
+<li>使用基于密钥的认证</li>
+<li>禁止root用户直接登陆</li>
+<li>显示ssh的访问频度和并发在线数</li>
+<li>经常分析日志</li>
+</ul>
+<p>ssh的几个好工具</p>
+<ul>
+<li>epel源，软件包：fuse-sshfs 命令：sshfs 10.0.0.3:/data /mnt</li>
+<li>epel源，软件包：sshpass 命令：ssh [option] command parameters</li>
+<li>epel源，软件包：pssh 命令：pssh [option] command […]</li>
+</ul>
+<p>dropbear：另一个开源ssh协议软件</p>
+<h4 id="文件完整性检查"><a href="#文件完整性检查" class="headerlink" title="文件完整性检查"></a>文件完整性检查</h4><p><strong>AIDE Advanced Instrusion Detection Environment</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install aide</span><br><span class="line">vim &#x2F;etc&#x2F;aide.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="sudo授权"><a href="#sudo授权" class="headerlink" title="sudo授权"></a>sudo授权</h4><h5 id="1-什么是sudo"><a href="#1-什么是sudo" class="headerlink" title="1.什么是sudo"></a>1.什么是sudo</h5><p>sudo是superuser do，允许系统管理员让普通用户执行一些或全部的root命令的一个工具。</p>
+<p>sudo可以有效减少root用户的登录和管理实践，同时提高了系统安全性。</p>
+<p>超级用户将普通用户的名字、可以执行的特定命令、按照那种用户或用户组的身份执行等信息登记在特殊的文件中（一般是/etc/sudoers），即完成对该用户的授权。</p>
+<h5 id="2-sudo的组成"><a href="#2-sudo的组成" class="headerlink" title="2.sudo的组成"></a>2.sudo的组成</h5><p>包：sudo</p>
+<p>配置文件：/etc/sudo.conf</p>
+<p>授权规则配置文件：</p>
+<p>/etc/sudoers</p>
+<p>/etc/sudoers.d</p>
+<p>安全编辑授权规则文件和语法检查文件</p>
+<p>/usr/sbin/visudo</p>
+<p>授权编辑规则文件的工具：</p>
+<p>/usr/bin/sudoedit</p>
+<p>执行授权命令：</p>
+<p>/usr/bin/sudo</p>
+<p>时间戳文件：</p>
+<p>/var/db/sudo</p>
+<p><strong>日志文件：</strong></p>
+<p>/var/log/secure</p>
+<h5 id="3-sudo的命令"><a href="#3-sudo的命令" class="headerlink" title="3.sudo的命令"></a>3.sudo的命令</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sudo</span><br><span class="line">sudo -i -u lv -i login -u 用户 切换用户，跟su类似，但是sudo必须提前授权，而且输入的密码是自己的密码，不是其他用户的密码</span><br><span class="line">sudo -u command</span><br><span class="line">-l 列出用户在主机上可用的和被禁止的命令</span><br><span class="line">-V 大写 显示版本信息等配置信息</span><br><span class="line">-u user 默认为root</span><br><span class="line">-v 小写 再延长密码有效期限5分钟，更新时间戳</span><br><span class="line">-k 清除时间戳，下次需要重新输入密码</span><br><span class="line">-K 大写 与-k类似，还要删除时间戳文件</span><br><span class="line">-b 在后台执行指令</span><br><span class="line">-p 改变询问密码的提示符号</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-sudo授权规则的配置"><a href="#4-sudo授权规则的配置" class="headerlink" title="4.sudo授权规则的配置"></a>4.sudo授权规则的配置</h5><p>/etc/sudoers</p>
+<p>/etc/sudoers.d/</p>
+<p>支持别名定义</p>
+<p>授权格式规则：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">用户	登入主机&#x3D;（代表用户）	命令</span><br><span class="line">user	host&#x3D;(run as )	command</span><br></pre></td></tr></table></figure>
+
+<p>范例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root	ALL&#x3D;(ALL)	ALL</span><br></pre></td></tr></table></figure>
+
+<p>注意command要写绝对路径</p>
+<h5 id="5-一些例子"><a href="#5-一些例子" class="headerlink" title="5.一些例子"></a>5.一些例子</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">!&#x2F;bin&#x2F;cat &#x2F;var&#x2F;log&#x2F;secure* *</span><br><span class="line">注意这个如果不加!后面的内容，用户可以执行如下命令cat &#x2F;var&#x2F;log&#x2F;secure &#x2F;etc&#x2F;shadow 这样的命令随便查看系统的文件。很危险。</span><br></pre></td></tr></table></figure>
+
+<h4 id="PAM认证机制"><a href="#PAM认证机制" class="headerlink" title="PAM认证机制"></a>PAM认证机制</h4><h5 id="1-PAM是什么"><a href="#1-PAM是什么" class="headerlink" title="1.PAM是什么"></a>1.PAM是什么</h5><p>PAM：Pluggable Authentication Modules，插件式的验证模块，sun公司开发</p>
+<p>PAM是一种架构，它可以让服务和服务的认证分开，从而使得运维可以灵活地根据需要给不同的服务配置不同的认证方式而无需更改服务程序的一种认证框架</p>
+<p>开发按照这个框架开发软件，开发好的软件让运维去配置，这个配置和软件是分开的</p>
+<p>应用程序开发者通过在服务程序中使用PAM API 来实现对认证方法的调用；</p>
+<p>PAM服务模块的开发者则利用PAM SPI 来编写模块；</p>
+<p>PAM接口库则读取配置文件，将应用程序和相应的PAM服务模块联系起来</p>
+<h5 id="2-PAM的组成"><a href="#2-PAM的组成" class="headerlink" title="2.PAM的组成"></a>2.PAM的组成</h5><p>包名：pam</p>
+<p>模块文件目录：/lib64/secruity/*.so</p>
+<p>特定模块相关的设置文件：/etc/security/</p>
+<p>应用程序调用PAM模块的配置文件</p>
+<ul>
+<li>主配置文件：/etc/pam.conf，默认不存在，一般不使用主配置</li>
+<li>为每种应用模块提供一个专用的配置文件：/etc/pam.d/APP_NAME</li>
+<li>注意：如果/etc/pam.d存在，/etc/pam.conf将失效</li>
+</ul>
+<p>查看一个应用是否支持pam</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ldd &#96;which sshd&#96; | grep libpam</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-PAM的工作原理"><a href="#3-PAM的工作原理" class="headerlink" title="3.PAM的工作原理"></a>3.PAM的工作原理</h5><p>PAM认证一般遵循这样的顺序：Service（服务）–&gt;PAM（配置文件）–&gt;pam_*.so</p>
+<p>PAM认证首先要确定哪一项服务，然后加载相应的PAM的配置文件（位于/etc/pam.d/），最后调用认证文件（位于/lib64/security/）进行安全认证</p>
+<p>PAM的认证过程：</p>
+<ul>
+<li>使用者执行/usr/bin/passwd程序，并输入密码</li>
+<li>passwd开始调用PAM模块，PAM模块会搜索passwd程序的PAM相关设置文件，这个设置文件一般是在/etc/pam.d里面的与程序同名的文件，即PAM会搜寻/etc/pam.d/passwd这个配置文件</li>
+<li>经由/etc/pam.d/passwd设定文件的数据，取用PAM所提供的相关模块来进行验证</li>
+<li>将验证结果返回给passwd程序，而passwd程序会根据返回的结果决定下一个动作（重新输入密码或者通过验证）</li>
+</ul>
+<h5 id="4-PAM的使用"><a href="#4-PAM的使用" class="headerlink" title="4.PAM的使用"></a>4.PAM的使用</h5><p>PAM的使用就是对配置文件的管理</p>
+<p>下面是配置文件格式说明</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">type	control	   modul-path	 arguments</span><br><span class="line">tyep：指模块类型，即功能</span><br><span class="line">control：PAM库该如何处理与该服务相关的PAM模块的成功或失败情况，一个关键词实现</span><br><span class="line">module-path：用来指明本模块对应的程序文件的路径名</span><br><span class="line">arguments：用来传递给该模块的参数</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">模块类型 module-type</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Auth</td>
+<td>账号的认证和授权</td>
+</tr>
+<tr>
+<td align="left">Account</td>
+<td>账户的有效性，与账号管理相关的非认证类的功能，如：用来限制/允许用户对某个服务的访问时间，限制用户的位置（如：root用户只能从控制台登录）</td>
+</tr>
+<tr>
+<td align="left">Password</td>
+<td>用户修改密码时密码复杂度检查机制等功能</td>
+</tr>
+<tr>
+<td align="left">Session</td>
+<td>用户会话期间的控制，如：最多打开的文件数，最多的进程数等</td>
+</tr>
+<tr>
+<td align="left">-type</td>
+<td>表示因为缺失而不能加载的模块将不记录到系统日志，对于那些不总是安装在系统上的模块有用</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>required</td>
+<td>一票否决，表示本模块必须返回成功才能通过认证，但是如果该模块返回失败，失败结果也不会立即通知用户，而是要等到同一type中的所有模块全部执行完毕，再将失败结果返回给应用程序，这个是必要条件</td>
+</tr>
+<tr>
+<td>requisite</td>
+<td>一票否决，根required区别在于它认证失败马上将控制权返回给应用程序，不再等待同一type内的任何模块</td>
+</tr>
+<tr>
+<td>sufficient</td>
+<td>一票通过，表明本模块返回成功则通过身份认证的要求，不必再执行同一type内其他模块，但如果本模块返回失败则可以忽略，是充分条件</td>
+</tr>
+<tr>
+<td>optional</td>
+<td>可选的，返回值被忽略</td>
+</tr>
+<tr>
+<td>include</td>
+<td>调用其他的配置文件中定义的配置信息</td>
+</tr>
+</tbody></table>
+<p>module-path：模块文件所在绝对路径，/lib64/security/下的不用写绝对路径</p>
+<table>
+<thead>
+<tr>
+<th>arguments</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>debug</td>
+<td>该模块应当用syslog()将调试信息写入到系统日志文件</td>
+</tr>
+<tr>
+<td>no_warn</td>
+<td>表明该模块不应把警告信息发送给应用程序</td>
+</tr>
+<tr>
+<td>use_first_pass</td>
+<td>该模块不能提示用户输入密码，只能从前一个模块得到输入密码</td>
+</tr>
+<tr>
+<td>try_first_pass</td>
+<td>该模块首先用前一个模块从用户得到密码，，如果该密码验证不通过，再提示用户输入新密码</td>
+</tr>
+<tr>
+<td>use_mapped_pass</td>
+<td>该模块不能提示用户输入密码，而是使用映射过的密码</td>
+</tr>
+<tr>
+<td>expose_account</td>
+<td>允许该模块显示用户的账号名等信息，一般只能在安全的环境下使用，因为泄露用户名会对安全造成一定程度的威胁</td>
+</tr>
+</tbody></table>
+<p>注意：修改PAM配置文件立即生效</p>
+<p>建议：编辑pam规则时，保持至少一个root会话打开，以防止root身份验证错误</p>
+<h5 id="5-常用的PAM模块"><a href="#5-常用的PAM模块" class="headerlink" title="5.常用的PAM模块"></a>5.常用的PAM模块</h5><p>1.pam_shells.so模块：检查有效shells</p>
+<p>2.pam_securetty.so模块：只允许root用户在/etc/securetty列出的安全终端上登录</p>
+<p>3.pam_nologin.so模块：如果/etc/nologin文件存在，将导致非root用户无法登录，当该用户登录时，会显示/etc/nologin文件内容，并拒绝登录</p>
+<p>4.<strong>pam_limits.so模块</strong>：在用户级别实现对其可使用的资源的限制，例如：可打开的文件的数量，可运行的进程数量，可用内存空间</p>
+<p>有自己独有的配置文件 /etc/security/limits.conf      /etc/security/limits.d/*.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">格式是</span><br><span class="line">每行一个定义：</span><br><span class="line">&lt;domain&gt;	&lt;type&gt;	 &lt;item&gt; 	&lt;value&gt;</span><br><span class="line">例如：</span><br><span class="line">*	soft	nproc	1024</span><br></pre></td></tr></table></figure>
+
+<p><domain>应用对象：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">username 单个用户</span><br><span class="line">@group 组内用户</span><br><span class="line">* 所有用户</span><br><span class="line">% 仅用于限制 最大登录限制，可以使用%group，限制一个组最大登录数量，只用一个 % 表示对所有用户的最大登录数量限制</span><br></pre></td></tr></table></figure>
+
+<p><type>限制类型：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">soft 软限制，普通用户自己可以修改</span><br><span class="line">hard 硬限制，由root用户设定，且通过kernel强制生效</span><br><span class="line">- 两者同时限定</span><br></pre></td></tr></table></figure>
+
+<p><item>限制资源</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nofile 能够同时打开最多的文件数量，默认1024</span><br><span class="line">nproc 同时运行的进程的最大数量，默认1024</span><br></pre></td></tr></table></figure>
+
+<p>有自己的命令 ulimit，可以临时修改资源值</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ulimit -a 显示系统默认资源值</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200908172447757.png" alt="image-20200908172447757"></p>
+<p>建议生产环境这样配一下</p>
+<p>5.pam_succeed_if模块：根据参数中的所有条件都满足才返回成功</p>
+<p>6.pam_google_authenticator模块：实现ssh登录的两次身份验证，先验证APP的数字码，再验证root用户的密码，都通过才可以登录。目前只支持口令验证，不支持基于key验证。</p>
+<h4 id="时间同步服务"><a href="#时间同步服务" class="headerlink" title="时间同步服务"></a>时间同步服务</h4><p>1.临时同步时间的命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ntpdate IP</span><br><span class="line">ip 填写NTP服务器的域名或者IP</span><br><span class="line">date -s &quot;-1 minute&quot;  修改时间为1分钟前</span><br><span class="line">hwclock   硬件时间</span><br><span class="line">hwclock -s 修改系统时间为硬件时间</span><br><span class="line">hwclock -w 修改硬件时间为系统时间</span><br></pre></td></tr></table></figure>
+
+<p>2.ntp是一种协议，network time protocol</p>
+<p>3.根据ntp协议实现的软件是ntp和chrony</p>
+<p>4.chrony比ntp更加精确</p>
+<p>5.chrony：</p>
+<p>软件包：chrony</p>
+<p>两个主要程序：chronyd和chronyc</p>
+<ul>
+<li>chronyd：后台运行的守护进程，用于调整内核中运行的系统时钟和时钟服务器同步。它确定计算机增减时间的比率，并对此进行补偿</li>
+<li>chronyc：命令行用户工具，用于监控性能并进行多样化的配置。它可以在chronyd实例控制的计算机上工作，也可以在一台不同的远程计算机上工作。</li>
+</ul>
+<p>服务unit文件：/usr/lib/system/system/chronyd.service</p>
+<p>监听端口：323/udp，123/udp</p>
+<p>配置文件：/etc/chrony.conf</p>
+<p>通过修改chrony.conf里面两个地方实现时间同步：</p>
+<p>这是需要NTP同步服务器的配置，一个是配置NTP源，另一个是允许局域网内其他主机访问，获取时间，还一个是打开一个这个开关：哪怕远程NTP源都不能用了，也能把自己主机的时间同步给其他主机</p>
+<p>配置NTP源：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 # Use public servers from the pool.ntp.org project.                      </span><br><span class="line">2 # Please consider joining the pool (http:&#x2F;&#x2F;www.pool.ntp.org&#x2F;join.html).</span><br><span class="line">3 server ntp.aliyun.com  iburst</span><br><span class="line">4 server ntp1.aliyun.com  iburst</span><br><span class="line">5 server time1.cloud.tencent.com  iburst</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>允许其他主机访问：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">23 # Allow NTP client access from local network.</span><br><span class="line">24 #allow 192.168.0.0&#x2F;16</span><br><span class="line">25 allow 10.0.0.0&#x2F;24</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>打开开关：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">27 # Serve time even if not synchronized to a time source.</span><br><span class="line">28 local stratum 10</span><br></pre></td></tr></table></figure>
+
+<p>其他需要同步的主机只需要把NTP源配置成这个服务器的地址就行，然后都把服务打开</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">2 # Please consider joining the pool (http:&#x2F;&#x2F;www.pool.ntp.org&#x2F;join.html).</span><br><span class="line">3 #pool 2.centos.pool.ntp.org iburst</span><br><span class="line">4 server 10.0.0.4 iburst</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>开启chronyd服务，并且开机自启动</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable --now chronyd.service</span><br></pre></td></tr></table></figure>
+
+<h4 id="SELinux的禁用"><a href="#SELinux的禁用" class="headerlink" title="SELinux的禁用"></a>SELinux的禁用</h4><p>1.修改配置文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;selinux&#x2F;config</span><br><span class="line">  1 </span><br><span class="line">  2 # This file controls the state of SELinux on the system.</span><br><span class="line">  3 # SELINUX&#x3D; can take one of these three values:</span><br><span class="line">  4 #     enforcing - SELinux security policy is enforced.</span><br><span class="line">  5 #     permissive - SELinux prints warnings instead of enforcing.</span><br><span class="line">  6 #     disabled - No SELinux policy is loaded.                            </span><br><span class="line">  7 SELINUX&#x3D;enforcing</span><br></pre></td></tr></table></figure>
+
+<p>把最后一行改成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELINUX&#x3D;disabled</span><br></pre></td></tr></table></figure>
+
+<p>重启</p>
+<p>2.查看selinux的状态命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sestatus</span><br><span class="line">getenforce</span><br></pre></td></tr></table></figure>
+
+<p>3.临时设置selinux的值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setenforce 0|1</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/11/18/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/" data-id="ckhnf9hew000a40uthgty7tav" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/11/18/%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-rsyslog/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/18/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%AE%89%E8%A3%85MySQL%E8%84%9A%E6%9C%AC/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/11/18/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96%E9%83%A8%E7%BD%B2/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91MYSQL8.0/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-rsyslog/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%AE%89%E8%A3%85MySQL%E8%84%9A%E6%9C%AC/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2020 huihui<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

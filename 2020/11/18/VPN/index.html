@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>辉辉的数据库</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="VPN实验图：  大体步骤： 1.软件安装，包括VPN软件和证书管理软件，还包括客户端的OPENVPN软件安装 2.建立证书机构，颁发自签名证书、颁发VPN服务器证书、颁发VPN客户端证书，包括证书有效期等信息 3.把证书文件拷贝到openVPN服务要求放置的位置 4.配置openVPN服务器端文件 5.配置openVPN客户端文件 6.把客户端文件传送给客户端 7.证书的吊销 8.证书的申请颁发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="辉辉的数据库">
+<meta property="og:url" content="http://example.com/2020/11/18/VPN/index.html">
+<meta property="og:site_name" content="辉辉的数据库">
+<meta property="og:description" content="VPN实验图：  大体步骤： 1.软件安装，包括VPN软件和证书管理软件，还包括客户端的OPENVPN软件安装 2.建立证书机构，颁发自签名证书、颁发VPN服务器证书、颁发VPN客户端证书，包括证书有效期等信息 3.把证书文件拷贝到openVPN服务要求放置的位置 4.配置openVPN服务器端文件 5.配置openVPN客户端文件 6.把客户端文件传送给客户端 7.证书的吊销 8.证书的申请颁发">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200919103731793.png">
+<meta property="article:published_time" content="2020-11-18T13:08:14.248Z">
+<meta property="article:modified_time" content="2020-11-03T11:18:40.421Z">
+<meta property="article:author" content="huihui">
+<meta property="article:tag" content="notes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200919103731793.png">
+  
+    <link rel="alternate" href="/atom.xml" title="辉辉的数据库" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">辉辉的数据库</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">我们要丈量大地！</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-VPN" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2020/11/18/VPN/" class="article-date">
+  <time class="dt-published" datetime="2020-11-18T13:08:14.248Z" itemprop="datePublished">2020-11-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="VPN"><a href="#VPN" class="headerlink" title="VPN"></a>VPN</h2><p>实验图：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200919103731793.png" alt="image-20200919103731793"></p>
+<p>大体步骤：</p>
+<p>1.软件安装，包括VPN软件和证书管理软件，还包括客户端的OPENVPN软件安装</p>
+<p>2.建立证书机构，颁发自签名证书、颁发VPN服务器证书、颁发VPN客户端证书，包括证书有效期等信息</p>
+<p>3.把证书文件拷贝到openVPN服务要求放置的位置</p>
+<p>4.配置openVPN服务器端文件</p>
+<p>5.配置openVPN客户端文件</p>
+<p>6.把客户端文件传送给客户端</p>
+<p>7.证书的吊销</p>
+<p>8.证书的申请颁发、吊销的自动化脚本</p>
+<p>1.准备实验环境</p>
+<p>客户端：linux和Windows</p>
+<p>服务器端：vpn服务器、web服务器</p>
+<p>2.服务器端安装软件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.安装openvpn软件</span><br><span class="line">yum -y install openvpn</span><br><span class="line">2.安装证书管理软件</span><br><span class="line">yum -y install easy-rsa</span><br></pre></td></tr></table></figure>
+
+<p>3.准备相关配置文件，因为很多配置文件默认不生成，需要从/usr/share/doc/openvpn/sample/和/usr/share/easy-rsa/下面复制过来改。总体就是三个</p>
+<p>一个是VPN服务端配置文件</p>
+<p>一个是证书颁发的相关文件</p>
+<p>一个是证书相关的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#vpn服务器端配置文件</span><br><span class="line">[root@centos8 server]#cp &#x2F;usr&#x2F;share&#x2F;doc&#x2F;openvpn&#x2F;sample&#x2F;sample-config-files&#x2F;server.conf &#x2F;etc&#x2F;openvpn&#x2F;server&#x2F;</span><br><span class="line">#证书管理软件的必要目录和文件</span><br><span class="line">[root@centos8 openvpn]#cp -r &#x2F;usr&#x2F;share&#x2F;easy-rsa&#x2F; &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server</span><br><span class="line">#证书颁发的变量文件，包括证书有效期等信息</span><br><span class="line">[root@centos8 easy-rsa-server]#cp &#x2F;usr&#x2F;share&#x2F;doc&#x2F;easy-rsa&#x2F;vars.example &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;vars</span><br></pre></td></tr></table></figure>
+
+<p>4.提前配置证书有效期文件，CA机构自己颁发的证书的有效期尽可能时间长点，比如10年，给VPN服务器颁发的证书也可以设10年。这个vars文件有一点，一会给VPN客户端颁发的时候要改第二条 </p>
+<p>“set_var EASY_CERT_EXPIRE  “  客户端不能设置这么长的有效期，建议90天左右，看生产需要 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#pwd</span><br><span class="line">&#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3</span><br><span class="line">[root@centos8 3]#vim vars</span><br><span class="line">123 # In how many days should the root CA key expire?</span><br><span class="line">124 </span><br><span class="line">125 set_var EASYRSA_CA_EXPIRE   3650</span><br><span class="line">126 </span><br><span class="line">127 # In how many days should certificates expire?</span><br><span class="line">128 </span><br><span class="line">129 set_var EASYRSA_CERT_EXPIRE 3650</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>这下面都是CA的创建和证书的颁发</strong></p>
+<p>基本都会通过一个脚本来操作，./easy-rsa  help  来查看命令帮助</p>
+<p>5.通过easy-rsa脚本生成证书需要的所有目录，pki文件夹</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa init-pki</span><br><span class="line"></span><br><span class="line">Note: using Easy-RSA configuration from: &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3.0.7&#x2F;vars</span><br><span class="line"></span><br><span class="line">init-pki complete; you may now create a CA or requests.</span><br><span class="line">Your newly created PKI dir is: &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;pki</span><br><span class="line">[root@centos8 3]#tree</span><br><span class="line">.</span><br><span class="line">├── easyrsa</span><br><span class="line">├── openssl-easyrsa.cnf</span><br><span class="line">├── pki</span><br><span class="line">│   ├── openssl-easyrsa.cnf</span><br><span class="line">│   ├── private</span><br><span class="line">│   ├── reqs</span><br><span class="line">│   └── safessl-easyrsa.cnf</span><br><span class="line">├── vars</span><br><span class="line">└── x509-types</span><br><span class="line">    ├── ca</span><br><span class="line">    ├── client</span><br><span class="line">    ├── code-signing</span><br><span class="line">    ├── COMMON</span><br><span class="line">    ├── email</span><br><span class="line">    ├── kdc</span><br><span class="line">    ├── server</span><br><span class="line">    └── serverClient</span><br><span class="line"></span><br><span class="line">4 directories, 13 files</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>6.创建CA机构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa build-ca</span><br><span class="line">带nopass就是不要密码</span><br><span class="line">[root@centos8 3]#tree pki</span><br><span class="line">pki</span><br><span class="line">├── ca.crt	#生成的自签名证书</span><br><span class="line">├── certs_by_serial</span><br><span class="line">├── index.txt</span><br><span class="line">├── index.txt.attr</span><br><span class="line">├── issued</span><br><span class="line">├── openssl-easyrsa.cnf</span><br><span class="line">├── private</span><br><span class="line">│   └── ca.key		#生成的私钥文件</span><br><span class="line">├── renewed</span><br><span class="line">│   ├── certs_by_serial</span><br><span class="line">│   ├── private_by_serial</span><br><span class="line">│   └── reqs_by_serial</span><br><span class="line">├── reqs</span><br><span class="line">├── revoked</span><br><span class="line">│   ├── certs_by_serial</span><br><span class="line">│   ├── private_by_serial</span><br><span class="line">│   └── reqs_by_serial</span><br><span class="line">├── safessl-easyrsa.cnf</span><br><span class="line">└── serial</span><br><span class="line"></span><br><span class="line">12 directories, 7 files</span><br><span class="line"></span><br><span class="line">[root@centos8 3]#openssl x509 -in pki&#x2F;ca.crt  -noout -text  #查看证书文件</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>7.创建VPN服务器端证书申请</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa gen-req server nopass</span><br><span class="line">这一步生成了VPN服务器端的私钥和证书申请</span><br></pre></td></tr></table></figure>
+
+<p>8.签发VPN服务器端证书</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa sign-req server server</span><br><span class="line">这一步完成CA机构对VPN服务器端请求的认证，颁发出证书</span><br></pre></td></tr></table></figure>
+
+<p>9.创建Diffie-Hellman密钥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa gen-dh</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>到此VPN服务器端证书配置完成</strong></p>
+<p>10.准备客户端证书环境</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 openvpn]#cp -r &#x2F;usr&#x2F;share&#x2F;easy-rsa&#x2F; &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-client</span><br><span class="line">[root@centos8 easy-rsa-client]#cp &#x2F;usr&#x2F;share&#x2F;doc&#x2F;easy-rsa&#x2F;vars.example  &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-client&#x2F;3&#x2F;vars</span><br><span class="line">[root@centos8 3]#.&#x2F;easyrsa init-pki</span><br></pre></td></tr></table></figure>
+
+<p>11.创建客户端证书申请，这一步在/etc/openvpn/easy-rsa-client/3/下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa gen-req lvzhehui nopass</span><br></pre></td></tr></table></figure>
+
+<p>12.颁发客户端证书</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">先进入easy-rsa-server文件夹下，把客户端申请拷贝过来，使用CA机构去认证</span><br><span class="line">[root@centos8 3]#.&#x2F;easyrsa import-req &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-client&#x2F;3&#x2F;pki&#x2F;reqs&#x2F;lvzhehui.req lvzhehui</span><br><span class="line">记得修改一下证书有效期</span><br><span class="line">vim vars</span><br><span class="line">set_var EASYRSA_CERT_EXPIRE 90</span><br><span class="line">[root@centos8 3]#.&#x2F;easyrsa sign-req client lvzhehui</span><br></pre></td></tr></table></figure>
+
+<p>13.将CA和服务器证书相关文件复制到服务器相应的目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]#mkdir &#x2F;etc&#x2F;openvpn&#x2F;certs</span><br><span class="line">[root@centos8 ~]#cp &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;pki&#x2F;ca.crt &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;</span><br><span class="line">[root@centos8 ~]#cp &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;pki&#x2F;issued&#x2F;server.crt &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;</span><br><span class="line">[root@centos8 ~]#cp &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;pki&#x2F;private&#x2F;server.key &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;</span><br><span class="line">[root@centos8 ~]#cp &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;pki&#x2F;dh.pem &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;</span><br><span class="line">[root@centos8 ~]#tree &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;</span><br><span class="line">&#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;</span><br><span class="line">├── ca.crt</span><br><span class="line">├── dh.pem</span><br><span class="line">├── server.crt</span><br><span class="line">└── server.key</span><br><span class="line"></span><br><span class="line">0 directories, 4 files</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>14.将客户端私钥与证书相关文件复制到服务器相关的目录</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]#find &#x2F;etc&#x2F;openvpn&#x2F; \( -name &quot;lvzhehui.key&quot; -o -name &quot;lvzhehui.crt&quot; -o -name ca.crt \) -exec cp &#123;&#125; &#x2F;etc&#x2F;openvpn&#x2F;client&#x2F;lvzhehui&#x2F; \;</span><br><span class="line">这里就是复制三个文件 lvzhehui.key  lvzhehui.crt  ca.crt过来，使用了find的高级用法  </span><br><span class="line">-exec command &#123;&#125; \;  注意是格式要求  \; 必须要有</span><br></pre></td></tr></table></figure>
+
+<p><strong>到此CA机构创建、证书申请和颁发就完成了</strong></p>
+<p><strong>下面开始OpenVPN服务的配置</strong></p>
+<p>15.准备OpenVPN服务器端配置文件，下面的选项是必须的，其他选项都要备注</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 server]#grep -Ev &#39;^#|^;|^$&#39; server.conf </span><br><span class="line">port 1194</span><br><span class="line">proto tcp</span><br><span class="line">dev tun</span><br><span class="line">ca   &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;ca.crt</span><br><span class="line">cert &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;server.crt</span><br><span class="line">key  &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;server.key  # This file should be kept secret</span><br><span class="line">dh &#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;dh.pem</span><br><span class="line">server 10.8.0.0 255.255.255.0</span><br><span class="line">push &quot;route 172.16.0.0 255.255.255.0&quot;</span><br><span class="line">keepalive 10 120</span><br><span class="line">cipher AES-256-CBC</span><br><span class="line">max-clients 1024</span><br><span class="line">user openvpn</span><br><span class="line">group  openvpn</span><br><span class="line">persist-key</span><br><span class="line">persist-tun</span><br><span class="line">status openvpn-status.log</span><br><span class="line">log-append  openvpn.log</span><br><span class="line">verb 3</span><br><span class="line">#准备日志相关目录</span><br><span class="line">[root@centos8 server]#getent passwd openvpn</span><br><span class="line">openvpn:x:993:991:OpenVPN:&#x2F;etc&#x2F;openvpn:&#x2F;sbin&#x2F;nologin</span><br><span class="line">[root@centos8 server]#mkdir &#x2F;var&#x2F;log&#x2F;openvpn</span><br><span class="line">[root@centos8 server]#chown openvpn.openvpn &#x2F;var&#x2F;log&#x2F;openvpn</span><br><span class="line">[root@centos8 server]#ll -d &#x2F;var&#x2F;log&#x2F;openvpn</span><br><span class="line">drwxr-xr-x 2 openvpn openvpn 6 Sep 19 15:40 &#x2F;var&#x2F;log&#x2F;openvpn</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>16.配置iptables规则和内核参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#开启ip_forward数据转发功能</span><br><span class="line">vim &#x2F;etc&#x2F;sysctl.conf</span><br><span class="line">net.ipv4.ip_forward &#x3D; 1</span><br><span class="line"></span><br><span class="line">sysctl -p</span><br><span class="line"></span><br><span class="line">#iptables设置,相当于是客户端发给内网的信息都会被当成是VPN服务器发送的，这样内网服务器回复信息的时候知道发给VPN服务器，要不然内网服务器不知道10.0.0.0&#x2F;24网段的路由，会导致无法访问</span><br><span class="line">#临时设置</span><br><span class="line">[root@centos8 server]#iptables -t nat -A POSTROUTING -s 10.0.0.0&#x2F;24 -j MASQUERADE</span><br><span class="line">#永久保存</span><br><span class="line">[root@centos8 server]#echo &#39;iptables -t nat -A POSTROUTING -s 10.8.0.0&#x2F;24 -j MASQUERADE&#39; &gt;&gt; &#x2F;etc&#x2F;rc.local</span><br><span class="line">[root@centos8 server]#chmod +x &#x2F;etc&#x2F;rc.d&#x2F;rc.local</span><br></pre></td></tr></table></figure>
+
+<p>17.VPN服务启动</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">centos8缺少一个unit文件，需要从centos7复制一个</span><br><span class="line">[root@localhost ~]#rpm -ql openvpn|grep systemd</span><br><span class="line">&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;openvpn-client@.service</span><br><span class="line">&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;openvpn-server@.service </span><br><span class="line">&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;openvpn@.service  #centos8没有这个文件</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;doc&#x2F;openvpn-2.4.9&#x2F;README.systemd</span><br><span class="line"></span><br><span class="line">[root@centos8 server]#rpm -ql openvpn | grep systemd</span><br><span class="line">&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;openvpn-client@.service</span><br><span class="line">&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;openvpn-server@.service</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;doc&#x2F;openvpn&#x2F;README.systemd</span><br><span class="line"></span><br><span class="line">[root@localhost ~]#scp &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;openvpn@.service 10.0.0.3:&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;</span><br><span class="line"></span><br><span class="line">[root@centos8 openvpn]#systemctl start openvpn@server</span><br><span class="line">[root@centos8 openvpn]#systemctl status openvpn@server</span><br><span class="line">[root@centos8 openvpn]#ss -ntl</span><br></pre></td></tr></table></figure>
+
+<p>18.OpenVPN客户端配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">生成的客户端配置文件后缀必须是.ovpn</span><br><span class="line">[root@centos8 lvzhehui]#vim &#x2F;usr&#x2F;share&#x2F;doc&#x2F;openvpn&#x2F;sample&#x2F;sample-config-files&#x2F;client.conf</span><br><span class="line">[root@centos8 lvzhehui]#grep -Ev &#39;^$|^#|^;&#39; &#x2F;usr&#x2F;share&#x2F;doc&#x2F;openvpn&#x2F;sample&#x2F;sample-config-files&#x2F;client.conf &gt;&gt; &#x2F;etc&#x2F;openvpn&#x2F;client&#x2F;lvzhehui&#x2F;client.ovpn</span><br><span class="line">[root@centos8 lvzhehui]#vim client.ovpn </span><br><span class="line">  1 client</span><br><span class="line">  2 dev tun</span><br><span class="line">  3 proto tcp</span><br><span class="line">  4 remote 10.0.0.3 1194</span><br><span class="line">  5 resolv-retry infinite</span><br><span class="line">  6 nobind</span><br><span class="line">  7 ca ca.crt</span><br><span class="line">  8 cert lvzhehui.crt</span><br><span class="line">  9 key lvzhehui.key</span><br><span class="line"> 10 remote-cert-tls server                                                 </span><br><span class="line"> 11 cipher AES-256-CBC</span><br><span class="line"> 12 verb 3</span><br></pre></td></tr></table></figure>
+
+<p>19.在服务器打包证书并下载发送给Windows客户端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 lvzhehui]#tar cf lvzhehui.tar .&#x2F;</span><br><span class="line">tar: .&#x2F;lvzhehui.tar: file is the archive; not dumped</span><br><span class="line">[root@centos8 lvzhehui]#sz lvzhehui.tar</span><br></pre></td></tr></table></figure>
+
+<p>20.客户端下载，把客户端配置文件放入config文件夹中，连接，成功</p>
+<p>21.吊销证书</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 3]#.&#x2F;easyrsa revoke lvzhehui  #吊销证书</span><br><span class="line">[root@centos8 3]#.&#x2F;easyrsa gen-crl	#生成吊销列表文件</span><br><span class="line">[root@centos8 3]#vim &#x2F;etc&#x2F;openvpn&#x2F;server.conf</span><br><span class="line">#添加一行</span><br><span class="line">crl-verify &#x2F;etc&#x2F;openvpn&#x2F;easy-rsa-server&#x2F;3&#x2F;pki&#x2F;crl.pem   #发布吊销列表</span><br><span class="line">[root@centos8 3]#systemctl restart openvpn@server  #重启服务生效</span><br></pre></td></tr></table></figure>
+
+<p>22.证书过期，重新颁发证书</p>
+<p>需要删除这个用户原来所有的文件，才能重新颁发证书</p>
+<p>23.安全加固</p>
+<p>1.放置Dos攻击的安全增强</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">237 # Generate with:</span><br><span class="line">238 #   openvpn --genkey --secret ta.key</span><br><span class="line">239 #</span><br><span class="line">240 # The server and each client must have</span><br><span class="line">241 # a copy of this key.</span><br><span class="line">242 # The second parameter should be &#39;0&#39;</span><br><span class="line">243 # on the server and &#39;1&#39; on the clients.</span><br><span class="line">244 ;tls-auth ta.key 0 # This file is secret </span><br><span class="line"></span><br><span class="line">tls-auth ta.key 0  服务器端；客户端是1 使用这个命令生成 openvpn --genkey  --secret ta.key</span><br><span class="line">然后把这个放到&#x2F;etc&#x2F;openvpn&#x2F;certs&#x2F;下，给客户端也放一个</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2020/11/18/VPN/" data-id="ckhnf9heh000240ut4b1pftie" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/11/18/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%AE%89%E8%A3%85MySQL%E8%84%9A%E6%9C%AC/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/11/18/NoSQL%E6%95%B0%E6%8D%AE%E5%BA%93Redis/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/hexo/" style="font-size: 10px;">hexo</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">November 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/11/18/%E8%BF%90%E7%BB%B4%E8%87%AA%E5%8A%A8%E5%8C%96%E9%83%A8%E7%BD%B2/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91MYSQL8.0/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-rsyslog/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E5%8A%A0%E5%AF%86%E5%92%8C%E5%AE%89%E5%85%A8/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2020/11/18/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%AE%89%E8%A3%85MySQL%E8%84%9A%E6%9C%AC/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2020 huihui<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
