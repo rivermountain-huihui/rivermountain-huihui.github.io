@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -20,20 +20,20 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="title: KVMdate: 2020-11-18 08:48:10tags:   KVM — Kernel-Based Virtual Machine是什么：一种主流的、集成在内核的虚拟化技术为什么：应运而生，是Rea Hat的公司怎么使用：1.CPU对KVM技术的支持；         2.内核加载KVM模块         3.安装libvirt包         4.配合qemu、vi">
+  <meta name="description" content="KVM — Kernel-Based Virtual Machine是什么：一种主流的、集成在内核的虚拟化技术为什么：应运而生，是Rea Hat的公司怎么使用：1.CPU对KVM技术的支持；         2.内核加载KVM模块         3.安装libvirt包         4.配合qemu、virtio等技术实现完整的虚拟化掌握什么：半虚拟化、全虚拟化、KVM原理、KVM管理工具（">
 <meta property="og:type" content="article">
-<meta property="og:title" content="辉辉的数据库">
+<meta property="og:title" content="Linux启动和内核管理">
 <meta property="og:url" content="http://example.com/2020/11/18/KVM%20---%20Kernel-Based%20Virtual%20Machine/index.html">
 <meta property="og:site_name" content="辉辉的数据库">
-<meta property="og:description" content="title: KVMdate: 2020-11-18 08:48:10tags:   KVM — Kernel-Based Virtual Machine是什么：一种主流的、集成在内核的虚拟化技术为什么：应运而生，是Rea Hat的公司怎么使用：1.CPU对KVM技术的支持；         2.内核加载KVM模块         3.安装libvirt包         4.配合qemu、vi">
-<meta property="og:locale" content="en_US">
+<meta property="og:description" content="KVM — Kernel-Based Virtual Machine是什么：一种主流的、集成在内核的虚拟化技术为什么：应运而生，是Rea Hat的公司怎么使用：1.CPU对KVM技术的支持；         2.内核加载KVM模块         3.安装libvirt包         4.配合qemu、virtio等技术实现完整的虚拟化掌握什么：半虚拟化、全虚拟化、KVM原理、KVM管理工具（">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095822937.png">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095115933.png">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095027971.png">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111094930736.png">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111094845730.png">
-<meta property="article:published_time" content="2020-11-18T13:55:51.607Z">
-<meta property="article:modified_time" content="2020-11-18T13:58:45.212Z">
+<meta property="article:published_time" content="2020-11-18T00:48:10.000Z">
+<meta property="article:modified_time" content="2020-11-18T14:10:23.907Z">
 <meta property="article:author" content="huihui">
 <meta property="article:tag" content="notes">
 <meta name="twitter:card" content="summary">
@@ -48,11 +48,11 @@
     sidebar: "",
     isHome : false,
     isPost : true,
-    lang   : 'en'
+    lang   : 'zh-CN'
   };
 </script>
 
-  <title> | 辉辉的数据库</title>
+  <title>Linux启动和内核管理 | 辉辉的数据库</title>
   
 
 
@@ -92,7 +92,7 @@
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
+    <div class="toggle" aria-label="切换导航栏">
       <span class="toggle-line toggle-line-first"></span>
       <span class="toggle-line toggle-line-middle"></span>
       <span class="toggle-line toggle-line-last"></span>
@@ -122,12 +122,12 @@
   <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
   </ul>
@@ -157,7 +157,7 @@
     
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/KVM%20---%20Kernel-Based%20Virtual%20Machine/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -171,7 +171,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          
+          Linux启动和内核管理
         </h1>
 
         <div class="post-meta">
@@ -179,10 +179,10 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="Created: 2020-11-18 21:55:51 / Modified: 21:58:45" itemprop="dateCreated datePublished" datetime="2020-11-18T21:55:51+08:00">2020-11-18</time>
+              <time title="创建时间：2020-11-18 08:48:10 / 修改时间：22:10:23" itemprop="dateCreated datePublished" datetime="2020-11-18T08:48:10+08:00">2020-11-18</time>
             </span>
 
           
@@ -196,10 +196,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <hr>
-<p>title: KVM<br>date: 2020-11-18 08:48:10<br>tags: </p>
-<hr>
-<h1 id="KVM-—-Kernel-Based-Virtual-Machine"><a href="#KVM-—-Kernel-Based-Virtual-Machine" class="headerlink" title="KVM — Kernel-Based Virtual Machine"></a>KVM — Kernel-Based Virtual Machine</h1><p>是什么：一种主流的、集成在内核的虚拟化技术<br>为什么：应运而生，是Rea Hat的公司<br>怎么使用：1.CPU对KVM技术的支持；<br>         2.内核加载KVM模块<br>         3.安装libvirt包<br>         4.配合qemu、virtio等技术实现完整的虚拟化<br>掌握什么：半虚拟化、全虚拟化、KVM原理、KVM管理工具（OpenStack、CloudStack）<br>内容概述</p>
+        <h1 id="KVM-—-Kernel-Based-Virtual-Machine"><a href="#KVM-—-Kernel-Based-Virtual-Machine" class="headerlink" title="KVM — Kernel-Based Virtual Machine"></a>KVM — Kernel-Based Virtual Machine</h1><p>是什么：一种主流的、集成在内核的虚拟化技术<br>为什么：应运而生，是Rea Hat的公司<br>怎么使用：1.CPU对KVM技术的支持；<br>         2.内核加载KVM模块<br>         3.安装libvirt包<br>         4.配合qemu、virtio等技术实现完整的虚拟化<br>掌握什么：半虚拟化、全虚拟化、KVM原理、KVM管理工具（OpenStack、CloudStack）<br>内容概述</p>
 <ul>
 <li>   虚拟化基础</li>
 <li>   虚拟化KVM</li>
@@ -623,10 +620,13 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/11/18/Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E7%AE%A1%E7%90%86/" rel="prev" title="Linux启动和内核管理">
-      <i class="fa fa-chevron-left"></i> Linux启动和内核管理
+    <a href="/2020/11/18/HTTP%E5%8D%8F%E8%AE%AE%E5%92%8CAPACHE/" rel="prev" title="HTTP协议和APACHE">
+      <i class="fa fa-chevron-left"></i> HTTP协议和APACHE
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/18/Linux%E9%98%B2%E7%81%AB%E5%A2%99/" rel="next" title="Linux防火墙">
+      Linux防火墙 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -676,10 +676,10 @@
 
       <ul class="sidebar-nav motion-element">
         <li class="sidebar-nav-toc">
-          Table of Contents
+          文章目录
         </li>
         <li class="sidebar-nav-overview">
-          Overview
+          站点概览
         </li>
       </ul>
 
@@ -700,12 +700,12 @@
           <a href="/archives/">
         
           <span class="site-state-item-count">10</span>
-          <span class="site-state-item-name">posts</span>
+          <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
         <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">tags</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
@@ -737,7 +737,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">huihui</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
   </div>
 
         
