@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="title: KVMdate: 2020-11-18 08:48:10tags:   KVM — Kernel-Based Virtual Machine是什么：一种主流的、集成在内核的虚拟化技术为什么：应运而生，是Rea Hat的公司怎么使用：1.CPU对KVM技术的支持；         2.内核加载KVM模块         3.安装libvirt包         4.配合qemu、vi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="辉辉的数据库">
+<meta property="og:url" content="http://example.com/2020/11/18/KVM%20---%20Kernel-Based%20Virtual%20Machine/index.html">
+<meta property="og:site_name" content="辉辉的数据库">
+<meta property="og:description" content="title: KVMdate: 2020-11-18 08:48:10tags:   KVM — Kernel-Based Virtual Machine是什么：一种主流的、集成在内核的虚拟化技术为什么：应运而生，是Rea Hat的公司怎么使用：1.CPU对KVM技术的支持；         2.内核加载KVM模块         3.安装libvirt包         4.配合qemu、vi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095822937.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095115933.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095027971.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111094930736.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111094845730.png">
+<meta property="article:published_time" content="2020-11-18T13:55:51.607Z">
+<meta property="article:modified_time" content="2020-11-18T13:58:45.212Z">
+<meta property="article:author" content="huihui">
+<meta property="article:tag" content="notes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201111095822937.png">
+
+<link rel="canonical" href="http://example.com/2020/11/18/KVM%20---%20Kernel-Based%20Virtual%20Machine/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-cn'
+  };
+</script>
+
+  <title> | 辉辉的数据库</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">辉辉的数据库</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我们要丈量大地！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>الأرشيفات</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/KVM%20---%20Kernel-Based%20Virtual%20Machine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="huihui">
+      <meta itemprop="description" content="学习和看笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉辉的数据库">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+              
+
+              <time title="أُنشأ: 2020-11-18 21:55:51 / عُدل: 21:58:45" itemprop="dateCreated datePublished" datetime="2020-11-18T21:55:51+08:00">2020-11-18</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <hr>
+<p>title: KVM<br>date: 2020-11-18 08:48:10<br>tags: </p>
+<hr>
+<h1 id="KVM-—-Kernel-Based-Virtual-Machine"><a href="#KVM-—-Kernel-Based-Virtual-Machine" class="headerlink" title="KVM — Kernel-Based Virtual Machine"></a>KVM — Kernel-Based Virtual Machine</h1><p>是什么：一种主流的、集成在内核的虚拟化技术<br>为什么：应运而生，是Rea Hat的公司<br>怎么使用：1.CPU对KVM技术的支持；<br>         2.内核加载KVM模块<br>         3.安装libvirt包<br>         4.配合qemu、virtio等技术实现完整的虚拟化<br>掌握什么：半虚拟化、全虚拟化、KVM原理、KVM管理工具（OpenStack、CloudStack）<br>内容概述</p>
+<ul>
+<li>   虚拟化基础</li>
+<li>   虚拟化KVM</li>
+<li>   创建虚拟机</li>
+<li>   管理虚拟机</li>
+<li>   存储管理</li>
+<li>   网络管理</li>
+<li>   综合实战案例<h1 id="1-虚拟化基础"><a href="#1-虚拟化基础" class="headerlink" title="1 虚拟化基础"></a>1 虚拟化基础</h1><h2 id="1-1-虚拟化出现的原因"><a href="#1-1-虚拟化出现的原因" class="headerlink" title="1.1 虚拟化出现的原因"></a>1.1 虚拟化出现的原因</h2>传统物理机部署时间周期长、耗费大、资源利用率不高，部署无法自动化实现<h2 id="1-2-虚拟化和虚拟机"><a href="#1-2-虚拟化和虚拟机" class="headerlink" title="1.2 虚拟化和虚拟机"></a>1.2 虚拟化和虚拟机</h2>虚拟化是一种资源管理技术，将计算机实体的各种资源进行抽象、转换后呈现出来并可提供分隔、组合为一个或多个计算机配置环境，并重新分隔、重新组合，以达到最大化合理利用物理资源的目的。<br>虚拟计算机称为“虚拟机”（VM，Virtual Machine），它是一种严密隔离且内含操作系统和应用的软件容器。每个虚拟机都是完全独立的。通过将多台虚拟机放置在一台物理计算机上，可以仅在一台物理服务器或“主机”上运行多个操作系统和应用，名为“hypervisor”的精简软件层可以将虚拟机与主机分离开来，并根据需要为每个虚拟机动态分配计算资源。<br>虚拟机的主要特征：分区、隔离、封装、独立于硬件<h2 id="1-3-虚拟化类型"><a href="#1-3-虚拟化类型" class="headerlink" title="1.3 虚拟化类型"></a>1.3 虚拟化类型</h2></li>
+</ul>
+<p>4.虚拟化的类型：主机虚拟化、网络虚拟化、桌面虚拟化、应用虚拟化、存储虚拟化、库虚拟化、容器虚拟化</p>
+<h2 id="1-4-Hypervisor类型"><a href="#1-4-Hypervisor类型" class="headerlink" title="1.4 Hypervisor类型"></a>1.4 Hypervisor类型</h2><h3 id="Hypervisor是什么："><a href="#Hypervisor是什么：" class="headerlink" title="Hypervisor是什么："></a>Hypervisor是什么：</h3><ul>
+<li>   Hypervisor是一种运行在基础物理服务器和操作系统之间的中间软件层，其可以允许多个操作系统和应用共享底层的内存、CPU、磁盘等物理硬件，也可叫做VMM（Virtual Machine Monitor），即虚拟机监视器。</li>
+<li>   Hypervisor是所有虚拟化技术的核心，非中断地支持多工作负载迁移的能力是Hypervisor的基本功能，当服务器启动并执行Hypervisor时，它会给每一台虚拟机分配适量的内存、CPU、网络和磁盘，并加载所有虚拟机的客户端操作系统。</li>
+<li>   多数的虚拟化采用虚拟机管理程序Hypervisor</li>
+<li>   允许多种操作系统在相同的物理系统中运行</li>
+<li>   控制硬件并向来宾操作系统提供访问底层硬件的途径</li>
+<li>   向来宾操作系统提供虚拟化的硬件</li>
+</ul>
+<h3 id="X86-CPU的保护环：限制代码的作用范围"><a href="#X86-CPU的保护环：限制代码的作用范围" class="headerlink" title="X86 CPU的保护环：限制代码的作用范围"></a>X86 CPU的保护环：限制代码的作用范围</h3><ul>
+<li>   Ring 0 ：内核</li>
+<li>   Ring 1 ：设备驱动程序</li>
+<li>   Ring 2 ：设备驱动程序</li>
+<li>   Ring 3 ：用户空间<br>主要是Ring 0 和 Ring 3，下面介绍一下Ring 0 和Ring 3<br>Ring 0 ：Kernel Mode，是Host Kernel运行的模式，运行在内核态的代码可以无限制的对系统内存、设备驱动程序、网卡接口、显卡接口等外围设备进行访问。只有Host OS可以无限制的访问磁盘、键盘灯外围设备的数据，但是首先要在Host OS上安装驱动程序<br>Ring 3 ：User Mode，运行在用户态的程序代码需要受到CPU的检查，用户态代码只能访问规定可以访问的内存地址，不能直接访问外围设备、不能抢占CPU，所有的应用程序都运行在用户态上，当应用程序需要调用只能被内核态直接访问的硬件设备时，CPU会通过特定的接口去调用内核态代码，通过这样的方式让应用程序访问硬件。</li>
+</ul>
+<h3 id="Hypervisor分类："><a href="#Hypervisor分类：" class="headerlink" title="Hypervisor分类："></a>Hypervisor分类：</h3><p>裸金属型，Hypervisor直接运行在物理机–&gt;KVM属于裸金属型<br>宿主型，Hypervisor运行在一个操作系统上–&gt;Vm Ware</p>
+<h2 id="1-5-虚拟化技术分类"><a href="#1-5-虚拟化技术分类" class="headerlink" title="1.5 虚拟化技术分类"></a>1.5 虚拟化技术分类</h2><p>模拟器/软件仿真：QEMU<br>全虚拟化/本地虚拟化：特权接触、陷入模拟<br>    软件辅助的全虚拟化<br>    硬件辅助的全虚拟化–&gt;CPU直接支持，KVM就是基于硬件辅助的全虚拟化，通过在内核加载KVM模块，把Host OS 转换为一个VMM<br>    需要X86架构CPU；Intel VT，AMD-V支持<br>    KVM是硬件辅助的虚拟化技术，主要负责比较繁琐的CPU和内存虚拟化，而QEMU则负责I/O虚拟化，两者合作发挥自身的优势<br>半虚拟化–&gt;XEN，代表软件，virtio驱动<br>虚拟化技术发展过程：模拟和仿真 –&gt;软件辅助的全虚拟化–&gt;半虚拟化–&gt;硬件辅助的全虚拟化</p>
+<h2 id="1-6-云计算"><a href="#1-6-云计算" class="headerlink" title="1.6 云计算"></a>1.6 云计算</h2><p>云计算：以虚拟化为基础，以网络为中心，为用户提供数据存储和网络计算服务的方案，不是一种技术，云计算的技术是虚拟化<br>特征：按量付费、按需配置、运营成本低<br>云计算分类：<br>    公有云：为所有人提供的云服务<br>    私有云：政企喜欢用，安全和私有化，定制化<br>    混合云：私密的数据放在私有云，服务跑在公有云，安全和省钱的结合<br>云计算分层：<br>    传统模式： Internet Data Center，IDC，用户需要负责所有事情<br>    iaas：Infrastructure As A Service，基础硬件作为了一个服务提供给用户，用户需要管理操作系统及以上的事情<br>    paas：Platform As A Service，平台作为一个服务提供给用户，用户需要管理应用程序和用户数据<br>    saas：Software As A Service，应用程序作为一个服务提供给用户，用户只需要管理自己的用户数据<br>云计算和虚拟化：<br>云计算是一种服务模式，虚拟化是一种技术，他们是独立的，不存在谁一定依赖谁的问题，都能独立使用</p>
+<h1 id="2-虚拟化技术KVM架构和部署"><a href="#2-虚拟化技术KVM架构和部署" class="headerlink" title="2 虚拟化技术KVM架构和部署"></a>2 虚拟化技术KVM架构和部署</h1><h2 id="2-1-KVM概述"><a href="#2-1-KVM概述" class="headerlink" title="2.1 KVM概述"></a>2.1 KVM概述</h2><p>可加载的内核模块kvm.ko以及硬件支持模块，例如：kvm_intel<br>KVM（把Host OS变成VMM，也就是Hypervisor，提供CPU和内存的虚拟化接口）+QEMU（模拟其他所有设备）+libvirt（用户对虚拟机的管理工具） = 目前主流的虚拟化技术<br>KVM：模拟CPU和内存，它是在宿主机上的<br>QEMU：模拟/                  仿真其他设备，本身就是一个独立的软件，被KVM所依赖使用，它是在客户机上使用的<br>virtio：半虚拟化技术模拟磁盘I/O，比QEMU模拟的磁盘I/O快而被使用<br>libvirt：针对各种虚拟化平台的虚拟机管理API库，virsh、virt-install、virt-manager和云计算框架都在底层使用libvirt，libvirt包括三部分：API库、守护进程libvirtd和一个命令行工具virsh<br>红帽官网对KVM的介绍：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">KVM介绍</span><br><span class="line">https:&#x2F;&#x2F;www.redhat.com&#x2F;zh&#x2F;topics&#x2F;virtualization&#x2F;what-is-KVM</span><br><span class="line">KVM的教程</span><br><span class="line">https:&#x2F;&#x2F;access.redhat.com&#x2F;documentation&#x2F;zh-cn&#x2F;red_hat_enterprise_linux&#x2F;7&#x2F;html&#x2F;virtualization_getting_started_guide&#x2F;index</span><br><span class="line">在红帽上使用KVM安装虚拟机的个数限制</span><br><span class="line">https:&#x2F;&#x2F;access.redhat.com&#x2F;articles&#x2F;rhel-kvm-limits</span><br></pre></td></tr></table></figure>
+<p>KVM工作模式：<br>    模拟和仿真：QEMU-KVM<br>    半虚拟化设备，性能好：virtio，需要在客户机上安装<br>    透传物理主机设备，性能好，但迁移受到影响：之间使用USB</p>
+<p>KVM集中管理平台：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.linux-kvm.org&#x2F;page&#x2F;Management_Tools</span><br></pre></td></tr></table></figure>
+<p>OpenStack：开源，主流，复杂<br>Porxmox vritualization environment：免费，简单</p>
+<h2 id="2-2-KVM宿主机环境准备"><a href="#2-2-KVM宿主机环境准备" class="headerlink" title="2.2 KVM宿主机环境准备"></a>2.2 KVM宿主机环境准备</h2><p>因为是做实验，使用虚拟机跑虚拟机，因此我们的虚拟机需要开启CPU支持，Inter-VT或者AMD-V</p>
+<p>验证开启虚拟化的方法，只要能搜出内容就是支持<br><code>lsmod | grep kvm</code></p>
+<p><code>grep -Em 1 &quot;vmx|svm&quot; /proc/cpuinfo</code></p>
+<p><code>ll /dev/kvm</code></p>
+<h2 id="KVM工具包介绍"><a href="#KVM工具包介绍" class="headerlink" title="KVM工具包介绍"></a>KVM工具包介绍</h2><ul>
+<li>   qemu-kvm：为kvm提供底层仿真支持</li>
+<li>   libvirt-daemon：libvirtd守护进程，管理虚拟机</li>
+<li>   libvirt-client：用户端软件，提供客户端管理命令</li>
+<li>   libvirt-daemon-driver-qemu：libvirtd连接qemu的驱动</li>
+<li>   libvirt：使用最多的KVM虚拟机管理工具和应用程序接口，即通过libvirt调用KVM创建虚拟机，libvirt是KVM通用的访问API，它不但能管理KVM，还能管理VMware、Xen、Hyper-V、VirtualBox</li>
+<li>   virt-manager：图形界面虚拟机管理工具，它通过底层调用libvirt实现对虚拟机的管理功能</li>
+<li>   virt-install：命令行虚拟机安装工具</li>
+<li>   virsh：命令行形式的虚拟机管理工具</li>
+<li>   virt-viewer：通过VNC和SPICE协议显示虚拟机图形控制台的最小工具，软件包是virtviewer</li>
+<li>   cockpit：Centos8提供的基于Web的虚拟机管理界面</li>
+</ul>
+<h3 id="libvirt包"><a href="#libvirt包" class="headerlink" title="libvirt包"></a>libvirt包</h3><p>一个调用KVM接口或其他虚拟化技术接口的API工具包，为用户空间的应用程序提供API</p>
+<h3 id="安装KVM相关包"><a href="#安装KVM相关包" class="headerlink" title="安装KVM相关包"></a>安装KVM相关包</h3><p>1.qemu-kvm，提供虚拟机除了CPU和内存之外硬件的模拟功能<br>2.libvirt，调用KVM接口，为虚拟机管理软件提供API<br>3.virt-manager,virt-install，虚拟机管理软件<br>4.Centos8还提供了一个Web管理虚拟机的软件，cockpit，启动服务后，浏览器方位<a href="http://localhost:9090；我没装上">http://localhost:9090；我没装上</a><br>5.Ubuntu安装KVM的包：qemu-kvm vir-manager libvirt-daemon-system；使用kvm-ok进行验证</p>
+<p>使用X11 server的方法：</p>
+<p>1.export DISPLAY=10.0.0.2:0.0<br>2.在Linux上使用一个需要图形的软件，比如virt-manager<br>3.这时候在Windows上就可以看到Linux上的软件的图形了</p>
+<p>安装完libvirt后，会生成一个virbr0网卡，类似VMware上的VMNet8网卡，充当虚拟机的NAT网卡，还有一个virbr0-nic，它是代表桥接到virbr0上的网卡，每当开启一个虚拟机，都会生成一个vir网卡，并且桥接在virbr0网卡上</p>
+<h3 id="准备ISO文件"><a href="#准备ISO文件" class="headerlink" title="准备ISO文件"></a>准备ISO文件</h3><p>创建一个文件夹专门存放ISO<br><code>mkdir -p /data/isos</code></p>
+<h1 id="3-创建虚拟机"><a href="#3-创建虚拟机" class="headerlink" title="3 创建虚拟机"></a>3 创建虚拟机</h1><p>使用MobaXterm软件！！！，我的xshell的x11server转发可能是有问题导致的卡死<br>使用干净的主机！<br>重启大法<br>创建虚拟机的方法大概是：</p>
+<ul>
+<li>   使用virt-manager图形化安装，这样的方式慢，需要人工值守</li>
+<li>   使用virt-install命令行安装，配合kickstart文件，可以快速安装<br>图形化连接guest的方法：</li>
+<li>   使用virt-manger,virt-viewer，连接方式是spice</li>
+<li>   使用VNC连接，需要查看不同guest运行时的不同的VNC端口，大概是5900+</li>
+</ul>
+<h2 id="3-1-使用virt-manager图形化安装"><a href="#3-1-使用virt-manager图形化安装" class="headerlink" title="3.1 使用virt-manager图形化安装"></a>3.1 使用virt-manager图形化安装</h2><p>systemctl enable –now libvirtd<br>打开virt-manager，然后选择镜像，安装<br>查看虚拟机网络配置信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@LAMP2 ~]$cat &#x2F;etc&#x2F;libvirt&#x2F;qemu&#x2F;networks&#x2F;default.xml</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-使用virt-install命令行安装"><a href="#3-2-使用virt-install命令行安装" class="headerlink" title="3.2 使用virt-install命令行安装"></a>3.2 使用virt-install命令行安装</h2><p>通过命令行的安装适合批量操作，而且节省磁盘文件，因为qemu创建的虚拟磁盘是根据实际需求来占用真实磁盘空间的，比如要求20G的虚拟磁盘，实际占用1 ~ 2 G，而使用virt-manager创建的虚拟机会实际占用20G真实磁盘空间<br>virt-install –help 安装选项<br>qemu-img create  创建一个虚拟磁盘<br>osinfo-query os  查看支持的OS版本</p>
+<h3 id="手动安装"><a href="#手动安装" class="headerlink" title="手动安装"></a>手动安装</h3><p>使用virt-install的步骤：<br>首先通过osinfo-query os 查看支持的系统版本，然后通过qemu-img创建一个虚拟磁盘，最后通过virt-install把镜像安装到指定的虚拟磁盘上去</p>
+<p>qemu-img的选项说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8-1.qcow2 20G</span><br><span class="line"></span><br><span class="line">create：创建一个虚拟磁盘</span><br><span class="line">-f：指定磁盘格式</span><br><span class="line">&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8.qcow2：磁盘路径</span><br><span class="line">20G：指定虚拟磁盘大小</span><br></pre></td></tr></table></figure>
+
+<p>virt-install的选项说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">virt-install --virt-type kvm --name centos8-1 --ram 1024 --vcpus 2 --cdrom&#x3D;&#x2F;data&#x2F;isos&#x2F;CentOS-8.2.2004-x86_64-dvd1.iso --disk path&#x3D;&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8-1.qcow2 --network network&#x3D;default --graphics vnc,listen&#x3D;0.0.0.0 --noautoconsole --os-variant&#x3D;centos8</span><br><span class="line"></span><br><span class="line">--virt-type：Hypervisor name to use (kvm, qemu, xen, ...)</span><br><span class="line">--name：指定虚拟机名称</span><br><span class="line">--ram：指定分配给虚拟机的内存大小</span><br><span class="line">--vcpus：Number of vcpus to configure for your guest</span><br><span class="line">--cdrom：CD-ROM installation media</span><br><span class="line">--disk：Specify storage with various options. 后面跟着的path就是指定磁盘路径</span><br><span class="line">--network：Configure a guest network interface  default就是默认模式，network一共有bridge、network、none、name几个选项</span><br><span class="line">--graphics：指定guest被什么类型的图形化连接</span><br><span class="line">--noautoconsole：不自动连接guest</span><br><span class="line">--os-variant：指定guest系统类型，比如centos8，win10</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用kickstart自动化安装"><a href="#使用kickstart自动化安装" class="headerlink" title="使用kickstart自动化安装"></a>使用kickstart自动化安装</h3><p>步骤是一样的，只是在virt-install命令中的参数不同，多了指向ks文件的选项，同时也需要提前在局域网中搭建一个Http服务，用于提供ks文件，记得文件的权限中要有可读</p>
+<p>先生成虚拟磁盘文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create -f qcow2 &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8_3.qcow2 20G</span><br></pre></td></tr></table></figure>
+<p>再使用virt-install安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virt-install --virt-type kvm --name centos8_3 --ram 8192 --vcpus 8 --disk path&#x3D;&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8_3.qcow2 --network network&#x3D;default --graphics vnc,listen&#x3D;0.0.0.0 --location&#x3D;&#x2F;data&#x2F;isos&#x2F;CentOS-8.2.2004-x86_64-minimal.iso --extra-args&#x3D;&quot;ks&#x3D;http:&#x2F;&#x2F;10.0.0.7&#x2F;centos8.conf&quot;</span><br></pre></td></tr></table></figure>
+<p>ks文件是我先手工安装了一个，然后把anaconda文件拷贝出来，修改了一下vda，因为直接写vda会报错，不太清楚为什么</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">#version&#x3D;RHEL8</span><br><span class="line">#ignoredisk --only-use&#x3D;vda</span><br><span class="line"># System bootloader configuration</span><br><span class="line">bootloader --append&#x3D;&quot; crashkernel&#x3D;auto&quot; --location&#x3D;mbr #--boot-drive&#x3D;vda</span><br><span class="line">autopart --type&#x3D;lvm</span><br><span class="line"># Partition clearing information</span><br><span class="line">clearpart --linux --initlabel #--drives&#x3D;vda</span><br><span class="line"># Use text mode install</span><br><span class="line">text</span><br><span class="line"># Use CDROM installation media</span><br><span class="line">cdrom</span><br><span class="line"># Keyboard layouts</span><br><span class="line">keyboard --vckeymap&#x3D;us --xlayouts&#x3D;&#39;&#39;</span><br><span class="line"># System language</span><br><span class="line">lang en_US.UTF-8</span><br><span class="line"></span><br><span class="line"># Network information</span><br><span class="line">network  --bootproto&#x3D;dhcp --device&#x3D;enp1s0 --onboot&#x3D;on --ipv6&#x3D;auto --no-activate</span><br><span class="line">network  --hostname&#x3D;localhost.localdomain</span><br><span class="line">repo --name&#x3D;&quot;Minimal&quot; --baseurl&#x3D;file:&#x2F;&#x2F;&#x2F;run&#x2F;install&#x2F;repo&#x2F;Minimal</span><br><span class="line"># Root password</span><br><span class="line">rootpw --iscrypted $6$h.Rq28GBTxyMGx31$VDCuSzoEw1lMH7rGnWemEDp9.utp4aZLVVUF0PSZXUycWSE6Lkk1ryIP.K91fqSMELvScnaGGPx34IjC0fQ&#x2F;J0</span><br><span class="line"># Run the Setup Agent on first boot</span><br><span class="line">firstboot --enable</span><br><span class="line"># Do not configure the X Window System</span><br><span class="line">skipx</span><br><span class="line"># System services</span><br><span class="line">services --enabled&#x3D;&quot;chronyd&quot;</span><br><span class="line"># System timezone</span><br><span class="line">timezone America&#x2F;New_York --isUtc</span><br><span class="line">reboot</span><br><span class="line">%packages</span><br><span class="line">@^minimal-environment</span><br><span class="line">kexec-tools</span><br><span class="line"></span><br><span class="line">%end</span><br><span class="line"></span><br><span class="line">%addon com_redhat_kdump --enable --reserve-mb&#x3D;&#39;auto&#39;</span><br><span class="line"></span><br><span class="line">%end</span><br><span class="line"></span><br><span class="line">%anaconda</span><br><span class="line">pwpolicy root --minlen&#x3D;6 --minquality&#x3D;1 --notstrict --nochanges --notempty</span><br><span class="line">pwpolicy user --minlen&#x3D;6 --minquality&#x3D;1 --notstrict --nochanges --emptyok</span><br><span class="line">pwpolicy luks --minlen&#x3D;6 --minquality&#x3D;1 --notstrict --nochanges --notempty</span><br><span class="line">%end</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后还是使用virt-manager去观察</p>
+<h3 id="使用现有的虚拟机文件直接复制一份，然后使用virt-install或者virt-manager导入就行"><a href="#使用现有的虚拟机文件直接复制一份，然后使用virt-install或者virt-manager导入就行" class="headerlink" title="使用现有的虚拟机文件直接复制一份，然后使用virt-install或者virt-manager导入就行"></a>使用现有的虚拟机文件直接复制一份，然后使用virt-install或者virt-manager导入就行</h3><p>虚拟机会生成一个配置文件，要修改硬件配置，只需要改配置文件就行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@LAMP2 qemu]$ll &#x2F;etc&#x2F;libvirt&#x2F;qemu&#x2F; </span><br><span class="line">total 20</span><br><span class="line">drwxr-xr-x 2 root root   27 Nov  7 18:49 autostart</span><br><span class="line">-rw------- 1 root root 5411 Nov  7 18:26 centos8_1.xml</span><br><span class="line">-rw------- 1 root root 3595 Nov  7 20:24 centos8_3.xml</span><br><span class="line">-rw------- 1 root root 5711 Nov  7 19:57 centos8.xml</span><br><span class="line">drwx------ 3 root root   42 Nov  7 09:49 networks</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="4-管理虚拟机"><a href="#4-管理虚拟机" class="headerlink" title="4 管理虚拟机"></a>4 管理虚拟机</h1><h2 id="4-1-使用半虚拟化驱动-virtio"><a href="#4-1-使用半虚拟化驱动-virtio" class="headerlink" title="4.1 使用半虚拟化驱动 virtio"></a>4.1 使用半虚拟化驱动 virtio</h2><p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201111095822937.png" alt="image-20201111095822937"></p>
+<p>kvm+qemu+guest的写入磁盘工作流程:<br>guest的应用程序发起–&gt;调用guest的驱动–&gt;调用宿主机cpu和内存(即调用KVM虚拟的cpu和内存)–&gt;调用guest的磁盘I/O等设备(qemu虚拟出来的硬件)–&gt;调用宿主机的硬件驱动–&gt;写入磁盘</p>
+<p>使用了半虚拟化驱动virtio后写入磁盘的工作流程：<br>guest的应用程序发起–&gt;virtio驱动传输–&gt;virtio模拟的设备(scsi控制器、网卡)以及qemu模拟的设备–&gt;调用宿主机的硬件驱动–&gt;写入磁盘</p>
+<p>Linux支持，Windows需要额外下载后安装驱动<br>Windows下获取驱动的地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;fedorapeople.org&#x2F;groups&#x2F;virt&#x2F;virtio-win&#x2F;direct-downloads&#x2F;archive-virtio&#x2F;virtio-win-0.1.185-2&#x2F;</span><br></pre></td></tr></table></figure>
+<h2 id="4-2-安装QEMU-guest-agent功能"><a href="#4-2-安装QEMU-guest-agent功能" class="headerlink" title="4.2 安装QEMU guest agent功能"></a>4.2 安装QEMU guest agent功能</h2><p>一个优化虚拟机的软件<br>安装方法：<br>centos：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install qemu-guest-agent</span><br></pre></td></tr></table></figure>
+<p>Windows需要自己找软件下载</p>
+<h1 id="5"><a href="#5" class="headerlink" title="5"></a>5</h1><h2 id="5-1-libvirt-架构"><a href="#5-1-libvirt-架构" class="headerlink" title="5.1 libvirt 架构"></a>5.1 libvirt 架构</h2><p>基于libvirtd（守护进程），virsh,virt-install,virt-manager可以使用–&gt;发送信息给qemu-kvm（调用guest）–&gt;/dev/kvm/–&gt;KVM kernel module（内核）</p>
+<h2 id="5-2-virt-manager-管理虚拟机"><a href="#5-2-virt-manager-管理虚拟机" class="headerlink" title="5.2 virt-manager 管理虚拟机"></a>5.2 virt-manager 管理虚拟机</h2><p>虚拟机的迁移，需要事先把虚拟机文件放在NFS共享文件夹中</p>
+<h2 id="5-3-virsh命令"><a href="#5-3-virsh命令" class="headerlink" title="5.3 virsh命令"></a>5.3 virsh命令</h2><p>virsh有两种工作模式：</p>
+<ul>
+<li>   交互模式</li>
+<li>   非交互模式<br>virsh list</li>
+</ul>
+<p>virsh主要功能</p>
+<p>virsh help</p>
+<p>virsh启动和关闭虚拟机<br>virsh shutdown<br>virsh list –uuid –name<br>virsh start </p>
+<p>强制关机<br>virsh destory</p>
+<p>暂停和恢复虚拟机</p>
+<p>virsh suspend </p>
+<p>virsh resume</p>
+<p>查看虚拟机参数</p>
+<p>virsh dump</p>
+<p>删除虚拟机</p>
+<p>virsh undefined</p>
+<p>配置虚拟机自动启动</p>
+<p>virsh autostart<br>virsh autostart –disable</p>
+<p>ll /etc/libvirt/qemu/autostart/</p>
+<p>今日重点：</p>
+<blockquote>
+<p>虚拟化的发展过程<br>仿真（QEMU）–&gt;软件辅助全虚拟化–&gt;半虚拟化（XEN）–&gt;硬件辅助全虚拟化（KVM）<br>KVM的搭建，virtio<br>工具的使用</p>
+</blockquote>
+<p>桥接是什么？把两个局域网（两个网段）的主机通过数据链路层连接起来<br>冲突域是什么？<br>广播域是什么？<br>一个IP地址的掩码是32位意味着什么？其他人怎么访问它？</p>
+<h1 id="存储管理"><a href="#存储管理" class="headerlink" title="存储管理"></a>存储管理</h1><h2 id="KVM存储模式"><a href="#KVM存储模式" class="headerlink" title="KVM存储模式"></a>KVM存储模式</h2><p>存储池、存储卷<br>libvirt以存储池的形式对存储进行统一管理、简化操作<br>virsh和virt-manager是功能相近的命令行/图形化的对虚拟机进行管理的工具</p>
+<p>存储模式分类：<br>1.基于文件系统的存储：</p>
+<ul>
+<li>   dir：Filesystem Directory 需要有挂载点的文件系统</li>
+<li>   fs：Pre-Formatted Block Device 无需挂载的文件系统，如位于SAN存储的文件系统，可以支持多个主机同时访问，而本地文件系统不支持</li>
+<li>   netfs：Network Exported Directory 网络文件系统，比如：NFS，SAMBA</li>
+</ul>
+<p>2.基于设备的存储<br>无需文件系统，性能更好，但可管理性差，无法实现快照</p>
+<ul>
+<li>   Disk：Physical Disk Device</li>
+<li>   Iscsi：iscsi target</li>
+<li>   Logical：LVM Volume Group</li>
+</ul>
+<h2 id="虚拟磁盘类型"><a href="#虚拟磁盘类型" class="headerlink" title="虚拟磁盘类型"></a>虚拟磁盘类型</h2><ul>
+<li><p> 固定Fixed<br>  在配置时，指定磁盘大小，不管在磁盘中实际占用多少，都占用相同大小的空间</p>
+</li>
+<li><p> 动态Dynamic<br>  刚创建出来很小，随着空间的使用逐渐增长到最大容量，但是只根据需求使用更多的空间</p>
+</li>
+<li><p> 差异Difference<br>  因为创建是差异磁盘，所以只保存变更的数据</p>
+</li>
+</ul>
+<h2 id="虚拟镜像文件格式"><a href="#虚拟镜像文件格式" class="headerlink" title="虚拟镜像文件格式"></a>虚拟镜像文件格式</h2><p>镜像文件存储在主机文件系统中，它可以存储在本地文件系统中，如ext4或xfs；或网络文件系统中，如NFS。<br>例如libguestfs这样的工具，能管理、备份及监控文件，KVM上的磁盘镜像格式包括：</p>
+<ul>
+<li>   raw：<br>默认的磁盘格式，它不是一种真正的磁盘格式，而是代表虚拟机所使用的原始镜像，它性能好，但是占用空间大。<br>raw可以是预分配（pre-allocated）或稀疏（sprase），预分配和稀疏的区别就是在真实磁盘上占用的空间是不是连续的。</li>
+<li>   cow：copy-on-write，昙花一现</li>
+<li>   qcow：过渡性方案</li>
+<li>   qcow2：<br>提供快照、压缩及加密等高级镜像功能，它按需分配磁盘空间，不管文件系统是否支持<br>优点是空间节约，功能丰富；缺点是性能较差</li>
+<li>   vmdk：VMware默认使用的磁盘格式</li>
+<li>   vhd：微软默认使用的文件格式</li>
+<li>   vdi：VirtualBox采用的文件格式<br>使用<code>qemu-img --help | grep Support</code> 查看支持的格式</li>
+</ul>
+<h2 id="使用qemu-img管理虚拟磁盘文件"><a href="#使用qemu-img管理虚拟磁盘文件" class="headerlink" title="使用qemu-img管理虚拟磁盘文件"></a>使用qemu-img管理虚拟磁盘文件</h2><p>qemu-img是一个功能强大的磁盘镜像管理工具</p>
+<h3 id="创建虚拟磁盘文件"><a href="#创建虚拟磁盘文件" class="headerlink" title="创建虚拟磁盘文件"></a>创建虚拟磁盘文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create [options]</span><br></pre></td></tr></table></figure>
+<p>查看磁盘文件的详细信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img info xxx</span><br></pre></td></tr></table></figure>
+<p>raw的非稀疏文件和稀疏文件<br>非稀疏文件：文件大小和实际占用空间相同<br>稀疏文件：文件大小和实际占用空间不同</p>
+<p>磁盘预分配策略<br>raw文件的预分配策略和文件系统是否支持有关，而qcow2与文件系统无关<br>预分配策略</p>
+<ul>
+<li>   off：默认，即不使用预分配策略，不算稀疏，生成的磁盘文件很小，随着使用，磁盘文件会变大</li>
+<li>   metadata：只预分配元数据，预分配后的磁盘文件属于稀疏映像类型</li>
+<li>   falloc：分配文件的块并标识他们的状态为位初始化，即只分配空间，但不置零，预分配后的虚拟磁盘属于非稀疏映像类型，相对于full模式，创建虚拟磁盘的速度要快相当于vmware中的磁盘置备选项：厚置备延迟置零</li>
+<li>   full：分配所有磁盘空间并置零，预分配后的虚拟磁盘属于非稀疏，创建最慢，相当于vmware中的磁盘置备选项：厚置备置零<br>举例：使用不同的模式创建磁盘文件<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">第一种：默认模式，其实就是off</span><br><span class="line">qemu-img create -f qcow2 test1.qcow2 1g</span><br><span class="line">第二种：写明使用off</span><br><span class="line">qemu-img create -f qcow2 test2.qcow2 1g -o preallocation&#x3D;off</span><br><span class="line">第三种：metadata模式，只预分配元数据，其他数据不分配</span><br><span class="line">qemu-img create -f qcow2 test3.qcow2 1g -o preallocation&#x3D;metadata</span><br><span class="line">第四种：falloc，磁盘空间占用了，但是其实空间中是空的</span><br><span class="line">qemu-img create -f qcow2 test4.qcow2 1g -o preallocation&#x3D;falloc</span><br><span class="line">第五种：full，实打实的占用</span><br><span class="line">qemu-img create -f qcow2 test5.qcow2 1g -o preallocation&#x3D;full</span><br><span class="line"></span><br><span class="line">把他们上面四种（默认和off是一样的）的空间大小对比一下</span><br><span class="line">[root@centos8 ~]$ll -h</span><br><span class="line">total 2.1G</span><br><span class="line">-rw-r--r-- 1 root root 193K Nov  9 21:15 test1.qcow2</span><br><span class="line">-rw-r--r-- 1 root root 193K Nov  9 21:19 test2.qcow2</span><br><span class="line">-rw-r--r-- 1 root root 1.1G Nov  9 21:24 test3.qcow2</span><br><span class="line">-rw-r--r-- 1 root root 1.1G Nov  9 21:25 test4.qcow2</span><br><span class="line">-rw-r--r-- 1 root root 1.1G Nov  9 21:27 test5.qcow2</span><br><span class="line">上面的4种模式，只有metadata(test3文件)是虚的，文件系统占用了1个G，但是使用磁盘占用工具du -h 查看，就只有八百多K</span><br><span class="line">使用qemu-img info 工具查看，也很明显的能看到</span><br></pre></td></tr></table></figure>
+<h3 id="后备差异虚拟磁盘"><a href="#后备差异虚拟磁盘" class="headerlink" title="后备差异虚拟磁盘"></a>后备差异虚拟磁盘</h3>性能差，多个虚拟机共同使用一套磁盘文件<br>概念上与链接克隆类似</li>
+</ul>
+<h3 id="虚拟磁盘的格式转换"><a href="#虚拟磁盘的格式转换" class="headerlink" title="虚拟磁盘的格式转换"></a>虚拟磁盘的格式转换</h3><p>qemu-img可以将不同格式的虚拟磁盘进行格式转换<br>比如将vmdk格式转换为qcow2</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">qemu-img convert centos8.vmdk centos8.qcow2</span><br><span class="line">[root@centos8 isos]$ll -h</span><br><span class="line">total 7.8G</span><br><span class="line">-rw-r--r-- 1 qemu qemu 1.1G Nov 10  2020  CentOS-7-x86_64-Minimal-2003.iso</span><br><span class="line">-rw-r--r-- 1 qemu qemu 1.7G Nov 10  2020  CentOS-8.2.2004-x86_64-minimal.iso</span><br><span class="line">-rw-r--r-- 1 root root 200G Nov  9 21:48  centos8-3.qcow2</span><br><span class="line">-rw-r--r-- 1 root root 2.7G Nov  9 21:44 &#39;CentOS 8-cl1.vmdk&#39;</span><br><span class="line"></span><br><span class="line">[root@centos8 isos]$du -h .&#x2F;*</span><br><span class="line">1.1G    .&#x2F;CentOS-7-x86_64-Minimal-2003.iso</span><br><span class="line">1.7G    .&#x2F;CentOS-8.2.2004-x86_64-minimal.iso</span><br><span class="line">2.6G    .&#x2F;centos8-3.qcow2</span><br><span class="line">2.7G    .&#x2F;CentOS 8-cl1.vmdk</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="调整虚拟磁盘大小"><a href="#调整虚拟磁盘大小" class="headerlink" title="调整虚拟磁盘大小"></a>调整虚拟磁盘大小</h3><p>注意事项：</p>
+<ul>
+<li>   操作之前一定要备份！缩减更要备份!</li>
+<li>   增加文件大小后，需要在客户机中使用fdisk、parted等分区工具进行一些操作，才能真正让客户机使用到增加后的镜像空间</li>
+<li>   xfs文件系统类型不支持缩减</li>
+<li>   qcow2不支持缩小镜像操作<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-img resize [--shrink] filename [+|-] size</span><br></pre></td></tr></table></figure>
+逻辑卷的添加过程：<br>下载软件包：<code>yum install lvm2</code><br>pvs<br>vgs<br>lvs</li>
+</ul>
+<p>1.把分区变成lvm格式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fdisk &#x2F;dev&#x2F;vda&#x2F;</span><br><span class="line">t</span><br><span class="line">8e #意思是分区是Linux LVM</span><br></pre></td></tr></table></figure>
+<p>2.把分区变成pv</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pvcreate &#x2F;dev&#x2F;vda3</span><br><span class="line">#物理卷删除</span><br><span class="line">pvremove &#x2F;dev&#x2F;vda3</span><br></pre></td></tr></table></figure>
+<p>3.添加进vg</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#创建新的vg</span><br><span class="line">vgcreate vg1 &#x2F;dev&#x2F;vda3</span><br><span class="line">#扩展vg</span><br><span class="line">vgextend vg1 &#x2F;dev&#x2F;vda3</span><br><span class="line">#缩减vg</span><br><span class="line">vgreduce vg1 &#x2F;dev&#x2F;vda3</span><br><span class="line">#删除vg，注意要先使用pvmove，再使用vgremove</span><br><span class="line">vgremove vg1</span><br></pre></td></tr></table></figure>
+<p>4.添加进lv，同时扩展文件系统大小</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#下面的方法是一步操作，既增加了逻辑卷，把文件系统也扩展了</span><br><span class="line">lvresize -r -l +100%free &#x2F;dev&#x2F;vda3&#x2F;lv3</span><br><span class="line">#下面是分步操作</span><br><span class="line">1.扩展lvm的空间</span><br><span class="line">lvextend -L + 100G &#x2F;dev&#x2F;vg1&#x2F;LV_name </span><br><span class="line">2.扩展文件系统大小</span><br><span class="line">#针对ext4的文件系统</span><br><span class="line">resize2fs &#x2F;dev&#x2F;VG_NAME&#x2F;LV_NAME</span><br><span class="line">#针对xfs</span><br><span class="line">xfs_growfs mountpoint</span><br><span class="line"></span><br><span class="line">#逻辑卷的普通操作</span><br><span class="line">lvcreate -L 100G -n LV_NAME VG_NAME</span><br></pre></td></tr></table></figure>
+
+<h2 id="磁盘快照"><a href="#磁盘快照" class="headerlink" title="磁盘快照"></a>磁盘快照</h2><h3 id="磁盘快照分类"><a href="#磁盘快照分类" class="headerlink" title="磁盘快照分类"></a>磁盘快照分类</h3><p>快照分类：</p>
+<ul>
+<li>   磁盘分类：对磁盘数据快照，用于虚拟机备份</li>
+<li>   内存快照：对虚拟机的内存/设备信息进行保存，用于迁移，使用virsh save实现，只能对运行的虚拟机进行</li>
+<li>   检查点checkpoint快照：同时保存磁盘和内存，保证数据一致性 </li>
+</ul>
+<p>按快照信息保存分为：</p>
+<ul>
+<li>   内置快照：快照信息和qcow2磁盘文件一个文件存放</li>
+<li>   外置快照：快照是一个单独的qcow2文件</li>
+</ul>
+<p>按虚拟机运行状态分为：</p>
+<ul>
+<li>   关机态快照</li>
+<li>   运行态快照<br>按磁盘数量可以分为：</li>
+<li>   单盘</li>
+<li>   多盘，涉及原子性</li>
+</ul>
+<h3 id="qemu-img-snapshot"><a href="#qemu-img-snapshot" class="headerlink" title="qemu-img snapshot"></a>qemu-img snapshot</h3><p>需要关闭虚拟机后操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#列出某个磁盘文件的快照</span><br><span class="line">qemu-img snapshot -l [snapshot_name] file_name</span><br><span class="line">#给某个磁盘文件生成快照，需要关闭虚拟机操作</span><br><span class="line">qemu-img snapshot -c snapshot_name file_name </span><br><span class="line">#给某个磁盘文件应用快照</span><br><span class="line">qemu-img snapshot -a snapshot_name file_name</span><br><span class="line">#删除某个磁盘文件的快照</span><br><span class="line">qemu-img snapshot -d </span><br></pre></td></tr></table></figure>
+<h4 id="对虚拟机做快照，使用virsh"><a href="#对虚拟机做快照，使用virsh" class="headerlink" title="对虚拟机做快照，使用virsh"></a>对虚拟机做快照，使用virsh</h4><p>可以开机拍快照</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#创建一个快照</span><br><span class="line">virsh snapshot-create system_name</span><br><span class="line">#列出快照</span><br><span class="line">virsh snapshot-list system_name</span><br><span class="line">#还原快照</span><br><span class="line">virsh snapshot-revert  centos8 --snapshotname&#x3D;1605003503</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="存储池"><a href="#存储池" class="headerlink" title="存储池"></a>存储池</h2><p>libvirt可以以存储池的形式对存储进行统一管理、简化操作<br>对于虚拟机操作，存储池和存储卷不是必须的；一个存储池中可以有多个存储卷<br>使用virsh命令管理存储池，或者使用virt-manager图形化管理存储池</p>
+<h3 id="显示存储池信息"><a href="#显示存储池信息" class="headerlink" title="显示存储池信息"></a>显示存储池信息</h3><p>virsh command –help<br>存储池相关配置文件在<br><code>/etc/libvirt/storage/</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">virsh pool-list</span><br><span class="line">virsh pool-list --all</span><br><span class="line">virsh pool-list --uuid</span><br><span class="line">virsh pool-info pool_name</span><br></pre></td></tr></table></figure>
+
+<p>存储池的分类，在命令行上的区别就是 –dir,–source-dev</p>
+<h3 id="基于目录的存储池"><a href="#基于目录的存储池" class="headerlink" title="基于目录的存储池"></a>基于目录的存储池</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">virsh pool-define-as pool_name --dir &#x2F;path&#x2F;to&#x2F;file</span><br><span class="line">virsh pool-start pool_name</span><br><span class="line">virsh pool-destory --pool pool_name #停止存储池</span><br><span class="line">virsh pool-delete --pool pool_name  #删除存储池文件目录</span><br><span class="line">#存储池的xml文件还没有删除</span><br><span class="line">virsh pool-undefine --pool pool_name #这个是删除存储池xml文件</span><br></pre></td></tr></table></figure>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#先生成定义文件</span><br><span class="line">[root@centos8 images]$virsh pool-define-as vm_images dir --target &#x2F;data&#x2F;pool_1&#x2F;</span><br><span class="line">Pool vm_images defined</span><br><span class="line">[root@centos8 images]$virsh pool-list --all</span><br><span class="line"> Name                 State      Autostart</span><br><span class="line">-------------------------------------------</span><br><span class="line"> default              active     yes</span><br><span class="line"> isos                 active     yes</span><br><span class="line"> vm_images            inactive   no</span><br><span class="line">#启动存储池</span><br><span class="line">[root@centos8 images]$virsh pool-start vm_images</span><br><span class="line">Pool vm_images started</span><br><span class="line"></span><br><span class="line">[root@centos8 images]$virsh pool-list</span><br><span class="line"> Name                 State      Autostart</span><br><span class="line">-------------------------------------------</span><br><span class="line"> default              active     yes</span><br><span class="line"> isos                 active     yes</span><br><span class="line"> vm_images            active     no</span><br><span class="line">[root@centos8 images]$ll &#x2F;etc&#x2F;libvirt&#x2F;storage&#x2F;</span><br><span class="line">total 12</span><br><span class="line">drwxr-xr-x 2 root root  41 Nov 10 17:24 autostart</span><br><span class="line">-rw------- 1 root root 538 Nov 10 17:21 default.xml</span><br><span class="line">-rw------- 1 root root 519 Nov 10 17:24 isos.xml</span><br><span class="line">-rw------- 1 root root 531 Nov 10 18:30 vm_images.xml</span><br><span class="line">#使用virt-manager此时就能在存储那看到多了一个存储池</span><br><span class="line"></span><br><span class="line">#删除存储池</span><br><span class="line">#先停止</span><br><span class="line">virsh pool-destroy --pool vm_images</span><br><span class="line">#再删除数据目录</span><br><span class="line">virsh pool-delete --pool vm_images</span><br><span class="line">#还得删除定义</span><br><span class="line">virsh pool-undefine --pool vm_images</span><br><span class="line">#这个时候，存储池的数据目录也被删除了，配置文件也被删除了</span><br></pre></td></tr></table></figure>
+<h3 id="基于文件系统的存储池"><a href="#基于文件系统的存储池" class="headerlink" title="基于文件系统的存储池"></a>基于文件系统的存储池</h3><p>1.准备分区并给分区创建文件系统<br>2.准备存储池的挂载点<br>3.创建分区的存储池</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh pool-define-as vm_images_fs fs --source-dev &quot;&#x2F;dev&#x2F;xxx&quot; --target &quot;&#x2F;vm_images&quot;</span><br></pre></td></tr></table></figure>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">#创建一个新的分区</span><br><span class="line">fdisk &#x2F;dev&#x2F;sda</span><br><span class="line">n</span><br><span class="line"></span><br><span class="line">+10G</span><br><span class="line"></span><br><span class="line">w</span><br><span class="line"></span><br><span class="line">创建成功</span><br><span class="line">[root@centos8 images]$lsblk</span><br><span class="line">NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda      8:0    0  200G  0 disk</span><br><span class="line">├─sda1   8:1    0    1G  0 part &#x2F;boot</span><br><span class="line">├─sda2   8:2    0  100G  0 part &#x2F;</span><br><span class="line">├─sda3   8:3    0   50G  0 part &#x2F;data</span><br><span class="line">├─sda4   8:4    0    1K  0 part</span><br><span class="line">├─sda5   8:5    0    2G  0 part [SWAP]</span><br><span class="line">├─sda6   8:6    0    1M  0 part</span><br><span class="line">└─sda7   8:7    0   10G  0 part</span><br><span class="line">sr0     11:0    1 1024M  0 rom</span><br><span class="line"></span><br><span class="line">#给新创建的sda7创建文件系统</span><br><span class="line">[root@centos8 images]$mkfs.ext4 &#x2F;dev&#x2F;sda7</span><br><span class="line">[root@centos8 images]$lsblk -lf</span><br><span class="line">NAME FSTYPE LABEL UUID                                 MOUNTPOINT</span><br><span class="line">sda</span><br><span class="line">sda1 ext4         26dbae7b-2ad4-4a96-97ec-48e343249d70 &#x2F;boot</span><br><span class="line">sda2 xfs          139e57fe-ff2f-4cc6-9279-5d073c558a92 &#x2F;</span><br><span class="line">sda3 xfs          20aad351-436f-4446-ad61-97ccba34bdcf &#x2F;data</span><br><span class="line">sda4</span><br><span class="line">sda5 swap         c988289a-5120-43a1-9ff4-a2079294d345 [SWAP]</span><br><span class="line">sda6</span><br><span class="line">sda7 ext4         361de4d5-39c3-4341-b735-8c7bef6e20d9</span><br><span class="line">sr0</span><br><span class="line"></span><br><span class="line">#创建存储池定义</span><br><span class="line">[root@centos8 images]$virsh pool-define-as vm_images_fs fs --source-dev &quot;&#x2F;dev&#x2F;sda7&quot; --target &quot;&#x2F;data&#x2F;vm_images&quot;</span><br><span class="line">#target后面跟的是文件夹，这个文件夹不需要手动创建，下面的命令可以自动生成</span><br><span class="line">#构建存储池</span><br><span class="line">[root@centos8 images]$virsh pool-build vm_images_fs</span><br><span class="line">#开启存储池</span><br><span class="line">[root@centos8 images]$virsh pool-start vm_images_fs</span><br><span class="line">Pool vm_images_fs started</span><br><span class="line">#开启存储池的开机自启动</span><br><span class="line">[root@centos8 images]$virsh pool-autostart vm_images_fs</span><br><span class="line">Pool vm_images_fs marked as autostarted</span><br><span class="line">#这个时候就可以看到，分区已经挂载了</span><br><span class="line">[root@centos8 images]$df -h</span><br><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs        3.8G     0  3.8G   0% &#x2F;dev</span><br><span class="line">tmpfs           3.9G     0  3.9G   0% &#x2F;dev&#x2F;shm</span><br><span class="line">tmpfs           3.9G  9.2M  3.8G   1% &#x2F;run</span><br><span class="line">tmpfs           3.9G     0  3.9G   0% &#x2F;sys&#x2F;fs&#x2F;cgroup</span><br><span class="line">&#x2F;dev&#x2F;sda2       100G   24G   77G  24% &#x2F;</span><br><span class="line">&#x2F;dev&#x2F;sda3        50G  2.0G   48G   4% &#x2F;data</span><br><span class="line">&#x2F;dev&#x2F;sda1       976M  135M  775M  15% &#x2F;boot</span><br><span class="line">tmpfs           779M   16K  779M   1% &#x2F;run&#x2F;user&#x2F;0</span><br><span class="line">&#x2F;dev&#x2F;sda7       9.8G   37M  9.3G   1% &#x2F;data&#x2F;vm_images</span><br><span class="line"></span><br><span class="line">#在virt-manager中也可以看到多了一个存储池</span><br><span class="line"></span><br><span class="line">#存储池的删除</span><br><span class="line">[root@centos8 images]$virsh pool-destroy vm_images_fs</span><br><span class="line">[root@centos8 images]$virsh pool-delete vm_images_fs</span><br><span class="line">[root@centos8 images]$virsh pool-undefine vm_images_fs</span><br><span class="line">#这个时候就删除完成了</span><br></pre></td></tr></table></figure>
+<p>这个是同步磁盘分区命令，如果创建完分区没显示，就用一用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">partprobe</span><br></pre></td></tr></table></figure>
+
+<h3 id="基于磁盘的存储池"><a href="#基于磁盘的存储池" class="headerlink" title="基于磁盘的存储池"></a>基于磁盘的存储池</h3><p>创建前需要添加一个新的磁盘<br>规定磁盘的格式，MBR|GPT<br>使用XML文件定义存储池</p>
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#添加硬盘，然后需要使用扫描，让系统识别</span><br><span class="line">for i in &#x2F;sys&#x2F;class&#x2F;scsi_host&#x2F;host*&#x2F;scan;do echo &quot;- - -&quot; &gt; $i;done</span><br><span class="line">[root@centos8 images]$lsblk</span><br><span class="line">NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda      8:0    0  200G  0 disk</span><br><span class="line">├─sda1   8:1    0    1G  0 part &#x2F;boot</span><br><span class="line">├─sda2   8:2    0  100G  0 part &#x2F;</span><br><span class="line">├─sda3   8:3    0   50G  0 part &#x2F;data</span><br><span class="line">├─sda4   8:4    0    1K  0 part</span><br><span class="line">├─sda5   8:5    0    2G  0 part [SWAP]</span><br><span class="line">├─sda6   8:6    0    1M  0 part</span><br><span class="line">└─sda7   8:7    0   10G  0 part</span><br><span class="line">sdb      8:16   0  200G  0 disk</span><br><span class="line">#给硬盘规定分区格式</span><br><span class="line">[root@centos8 images]$parted &#x2F;dev&#x2F;sdb mklabel gpt</span><br><span class="line">[root@centos8 images]$parted &#x2F;dev&#x2F;sdb print</span><br><span class="line">Model: VMware, VMware Virtual S (scsi)</span><br><span class="line">Disk &#x2F;dev&#x2F;sdb: 215GB</span><br><span class="line">Sector size (logical&#x2F;physical): 512B&#x2F;512B</span><br><span class="line">Partition Table: gpt</span><br><span class="line">#准备磁盘存储池对应的XML文件</span><br><span class="line">vim vm_images_disk.xml</span><br><span class="line">  1 &lt;pool type&#x3D;&#39;disk&#39;&gt;</span><br><span class="line">  2     &lt;name&gt;vm_images_disk&lt;&#x2F;name&gt;</span><br><span class="line">  3     &lt;source&gt;</span><br><span class="line">  4         &lt;device path&#x3D;&#39;&#x2F;dev&#x2F;sdb&#39;&#x2F;&gt;</span><br><span class="line">  5         &lt;format type&#x3D;&#39;gpt&#39;&#x2F;&gt;</span><br><span class="line">  6     &lt;&#x2F;source&gt;</span><br><span class="line">  7     &lt;target&gt;</span><br><span class="line">  8         &lt;path&gt;&#x2F;dev&#x2F;&lt;&#x2F;path&gt;</span><br><span class="line">  9     &lt;&#x2F;target&gt;</span><br><span class="line"> 10 &lt;&#x2F;pool&gt;</span><br><span class="line"></span><br><span class="line">#基于xml创建存储池</span><br><span class="line">[root@centos8 ~]$virsh pool-define vm_images_disk.xml</span><br><span class="line">Pool vm_images_disk defined from vm_images_disk.xml</span><br><span class="line">[root@centos8 ~]$virsh pool-start --pool vm_images_disk</span><br><span class="line">Pool vm_images_disk started</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-list</span><br><span class="line"> Name                 State      Autostart</span><br><span class="line">-------------------------------------------</span><br><span class="line"> default              active     yes</span><br><span class="line"> isos                 active     yes</span><br><span class="line"> vm_images_disk       active     no</span><br><span class="line"></span><br><span class="line">#删除的时候，需要先停止存储池，然后删除定义，但是不能使用delete了，因为是磁盘，无法删除</span><br><span class="line">[root@centos8 ~]$virsh pool-destroy vm_images_disk</span><br><span class="line">Pool vm_images_disk destroyed</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-undefine vm_images_disk</span><br><span class="line">Pool vm_images_disk has been undefined</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="基于LVM的存储池"><a href="#基于LVM的存储池" class="headerlink" title="基于LVM的存储池"></a>基于LVM的存储池</h3><p>其实是基于卷组（VG）<br>要求使用VG中的全部磁盘空间</p>
+<p>创建存储池的方法：</p>
+<ul>
+<li>   使用现有的VG创建存储池</li>
+<li>   创建新的VG创建存储池</li>
+</ul>
+<h4 id="原来没有逻辑卷组，直接连逻辑卷组和存储池一起创建"><a href="#原来没有逻辑卷组，直接连逻辑卷组和存储池一起创建" class="headerlink" title="原来没有逻辑卷组，直接连逻辑卷组和存储池一起创建"></a>原来没有逻辑卷组，直接连逻辑卷组和存储池一起创建</h4><p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">#需要添加一个磁盘，专门用于LVM</span><br><span class="line">[root@centos8 ~]$virsh pool-define-as vm_images_lvm logical --source-dev&#x3D;&#x2F;dev&#x2F;sdb</span><br><span class="line">#构建lvm</span><br><span class="line">[root@centos8 ~]$virsh pool-build vm_images_lvm</span><br><span class="line">Pool vm_images_lvm built</span><br><span class="line">[root@centos8 ~]$pvs</span><br><span class="line">  PV         VG            Fmt  Attr PSize   PFree</span><br><span class="line">  &#x2F;dev&#x2F;sdb   vm_images_lvm lvm2 a--  &lt;20.00g &lt;20.00g</span><br><span class="line">[root@centos8 ~]$vgs</span><br><span class="line">  VG            #PV #LV #SN Attr   VSize   VFree</span><br><span class="line">  vm_images_lvm   1   0   0 wz--n- &lt;20.00g &lt;20.00g</span><br><span class="line">[root@centos8 ~]$virsh pool-start vm_images_lvm</span><br><span class="line">Pool vm_images_lvm started</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-list</span><br><span class="line"> Name                 State      Autostart</span><br><span class="line">-------------------------------------------</span><br><span class="line"> default              active     yes</span><br><span class="line"> isos                 active     yes</span><br><span class="line"> vm_images_lvm        active     no</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="利用已存在的逻辑卷组创建存储池"><a href="#利用已存在的逻辑卷组创建存储池" class="headerlink" title="利用已存在的逻辑卷组创建存储池"></a>利用已存在的逻辑卷组创建存储池</h4><p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$virsh pool-define-as vm_images_lvm2 logical --source-name&#x3D;vm_images_lvm</span><br><span class="line">Pool vm_images_lvm2 defined</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-start vm_images_lvm2</span><br><span class="line">Pool vm_images_lvm2 started</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-list --all</span><br><span class="line"> Name                 State      Autostart</span><br><span class="line">-------------------------------------------</span><br><span class="line"> default              active     yes</span><br><span class="line"> isos                 active     yes</span><br><span class="line"> vm_images_lvm        active     no</span><br><span class="line"> vm_images_lvm2       active     no</span><br><span class="line"></span><br><span class="line">#删除存储池</span><br><span class="line">[root@centos8 ~]$virsh pool-destroy --pool vm_images_lvm2</span><br><span class="line">[root@centos8 ~]$virsh pool-delete --pool vm_images_lvm2</span><br><span class="line">[root@centos8 ~]$virsh pool-undefine vm_images_lvm2</span><br><span class="line">Pool vm_images_lvm2 has been undefined</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="基于NFS的存储池"><a href="#基于NFS的存储池" class="headerlink" title="基于NFS的存储池"></a>基于NFS的存储池</h3><p>需要两个宿主机，一个宿主机充当NFS服务器，另一个使用NFS</p>
+<h4 id="创建NFS共享"><a href="#创建NFS共享" class="headerlink" title="创建NFS共享"></a>创建NFS共享</h4><p>例子：<br>在10.0.0.18上搭建NFS服务，10.0.0.8上使用服务<br>在10.0.0.18上操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">dnf install -y nfs-utils</span><br><span class="line">systemctl start nfs-server.service</span><br><span class="line">mkdir -p &#x2F;data&#x2F;share</span><br><span class="line">vim &#x2F;etc&#x2F;exports</span><br><span class="line">1 &#x2F;data&#x2F;share *(rw,no_root_squash,sync,no_all_squash)</span><br><span class="line">[root@centos8 ~]$exportfs -r</span><br><span class="line">[root@centos8 ~]$exportfs -v</span><br><span class="line">&#x2F;data&#x2F;share     &lt;world&gt;(sync,wdelay,hide,no_subtree_check,sec&#x3D;sys,rw,secure,no_root_squash,no_all_squash)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="创建基于NFS的存储池"><a href="#创建基于NFS的存储池" class="headerlink" title="创建基于NFS的存储池"></a>创建基于NFS的存储池</h4><p>在10.0.0.8上操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$showmount -e 10.0.0.18</span><br><span class="line">Export list for 10.0.0.18:</span><br><span class="line">&#x2F;data&#x2F;share *</span><br><span class="line">#创建基于NFS的存储池的定义</span><br><span class="line">[root@centos8 ~]$virsh pool-define-as vm_images_nfs netfs --source-host 10.0.0.18 --source-path &#x2F;data&#x2F;share --target &#x2F;data&#x2F;vm_images_nfs</span><br><span class="line">Pool vm_images_nfs defined</span><br><span class="line">#自动生成挂载点</span><br><span class="line">[root@centos8 ~]$virsh pool-build vm_images_nfs</span><br><span class="line">Pool vm_images_nfs built</span><br><span class="line">#开启存储池后自动挂载</span><br><span class="line">[root@centos8 ~]$virsh pool-start vm_images_nfs</span><br><span class="line">Pool vm_images_nfs started</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$df -h</span><br><span class="line">Filesystem             Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs               3.8G     0  3.8G   0% &#x2F;dev</span><br><span class="line">tmpfs                  3.9G     0  3.9G   0% &#x2F;dev&#x2F;shm</span><br><span class="line">tmpfs                  3.9G   18M  3.8G   1% &#x2F;run</span><br><span class="line">tmpfs                  3.9G     0  3.9G   0% &#x2F;sys&#x2F;fs&#x2F;cgroup</span><br><span class="line">&#x2F;dev&#x2F;sda2              100G   11G   90G  11% &#x2F;</span><br><span class="line">&#x2F;dev&#x2F;sda3               50G  3.0G   47G   6% &#x2F;data</span><br><span class="line">&#x2F;dev&#x2F;sda1              976M  135M  775M  15% &#x2F;boot</span><br><span class="line">tmpfs                  779M  8.0K  779M   1% &#x2F;run&#x2F;user&#x2F;0</span><br><span class="line">10.0.0.18:&#x2F;data&#x2F;share   50G  2.0G   48G   4% &#x2F;data&#x2F;vm_images_nfs</span><br><span class="line"></span><br><span class="line">#删除存储池</span><br><span class="line">[root@centos8 ~]$virsh pool-destroy vm_images_nfs</span><br><span class="line">Pool vm_images_nfs destroyed</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-undefine vm_images_nfs</span><br><span class="line">Pool vm_images_nfs has been undefined</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-list --all</span><br><span class="line"> Name                 State      Autostart</span><br><span class="line">-------------------------------------------</span><br><span class="line"> default              active     yes</span><br><span class="line"> isos                 active     yes</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$df -h</span><br><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">devtmpfs        3.8G     0  3.8G   0% &#x2F;dev</span><br><span class="line">tmpfs           3.9G     0  3.9G   0% &#x2F;dev&#x2F;shm</span><br><span class="line">tmpfs           3.9G   18M  3.8G   1% &#x2F;run</span><br><span class="line">tmpfs           3.9G     0  3.9G   0% &#x2F;sys&#x2F;fs&#x2F;cgroup</span><br><span class="line">&#x2F;dev&#x2F;sda2       100G   11G   90G  11% &#x2F;</span><br><span class="line">&#x2F;dev&#x2F;sda3        50G  3.0G   47G   6% &#x2F;data</span><br><span class="line">&#x2F;dev&#x2F;sda1       976M  135M  775M  15% &#x2F;boot</span><br><span class="line">tmpfs           779M  8.0K  779M   1% &#x2F;run&#x2F;user&#x2F;0</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="存储卷管理"><a href="#存储卷管理" class="headerlink" title="存储卷管理"></a>存储卷管理</h2><p>一个存储池被分为多个存储卷，存储卷可以是：</p>
+<ul>
+<li>   文件</li>
+<li>   块设备，比如物理分区、LVM</li>
+<li>   libvirt管理的其他类型存储的抽象<br>存储卷管理相关命令<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vol-clone #克隆卷</span><br><span class="line">vol-create-as #通过一组参数创建卷</span><br><span class="line">vol-create #通过XML文件创建卷</span><br><span class="line">vol-delete #删除一个卷</span><br><span class="line">vol-download #下载卷到一个文件</span><br><span class="line">vol-info #存储卷的信息</span><br><span class="line">vol-list #列出卷</span><br></pre></td></tr></table></figure>
+<h3 id="基于目录的存储池的存储卷管理"><a href="#基于目录的存储池的存储卷管理" class="headerlink" title="基于目录的存储池的存储卷管理"></a>基于目录的存储池的存储卷管理</h3>先创建存储池，然后创建存储卷<br>例子：<br>创建存储池<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$mkdir -p &#x2F;data&#x2F;vm_images_dir</span><br><span class="line">[root@centos8 ~]$virsh pool-define-as vm_images_dir dir --target &#x2F;data&#x2F;vm_images_dir</span><br><span class="line">Pool vm_images_dir defined</span><br><span class="line">[root@centos8 ~]$virsh pool-start vm_images_dir</span><br><span class="line">Pool vm_images_dir started</span><br><span class="line">[root@centos8 ~]$virsh pool-dumpxml vm_images_dir</span><br><span class="line">&lt;pool type&#x3D;&#39;dir&#39;&gt;</span><br><span class="line">  &lt;name&gt;vm_images_dir&lt;&#x2F;name&gt;</span><br><span class="line">  &lt;uuid&gt;c72d03c3-aa8b-420d-8218-97664f7daa17&lt;&#x2F;uuid&gt;</span><br><span class="line">  &lt;capacity unit&#x3D;&#39;bytes&#39;&gt;53660876800&lt;&#x2F;capacity&gt;</span><br><span class="line">  &lt;allocation unit&#x3D;&#39;bytes&#39;&gt;3211886592&lt;&#x2F;allocation&gt;</span><br><span class="line">  &lt;available unit&#x3D;&#39;bytes&#39;&gt;50448990208&lt;&#x2F;available&gt;</span><br><span class="line">  &lt;source&gt;</span><br><span class="line">  &lt;&#x2F;source&gt;</span><br><span class="line">  &lt;target&gt;</span><br><span class="line">    &lt;path&gt;&#x2F;data&#x2F;vm_images_dir&lt;&#x2F;path&gt;</span><br><span class="line">    &lt;permissions&gt;</span><br><span class="line">      &lt;mode&gt;0755&lt;&#x2F;mode&gt;</span><br><span class="line">      &lt;owner&gt;0&lt;&#x2F;owner&gt;</span><br><span class="line">      &lt;group&gt;0&lt;&#x2F;group&gt;</span><br><span class="line">    &lt;&#x2F;permissions&gt;</span><br><span class="line">  &lt;&#x2F;target&gt;</span><br><span class="line">&lt;&#x2F;pool&gt;</span><br></pre></td></tr></table></figure>
+创建存储卷<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$virsh vol-create-as vm_images_dir test1.qcow2 1g --format qcow2</span><br><span class="line">[root@centos8 ~]$virsh vol-list vm_images_dir</span><br><span class="line"> Name                 Path</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line"> test1.qcow2          &#x2F;data&#x2F;vm_images_dir&#x2F;test1.qcow2</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh vol-info test1.qcow2 --pool vm_images_dir</span><br><span class="line">Name:           test1.qcow2</span><br><span class="line">Type:           file</span><br><span class="line">Capacity:       1.00 GiB</span><br><span class="line">Allocation:     196.00 KiB</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$ll &#x2F;data&#x2F;vm_images_dir&#x2F;</span><br><span class="line">total 196</span><br><span class="line">-rw------- 1 root root 196624 Nov 10 14:15 test1.qcow2</span><br><span class="line">[root@centos8 ~]$qemu-img info &#x2F;data&#x2F;vm_images_dir&#x2F;test1.qcow2</span><br><span class="line">image: &#x2F;data&#x2F;vm_images_dir&#x2F;test1.qcow2</span><br><span class="line">file format: qcow2</span><br><span class="line">virtual size: 1.0G (1073741824 bytes)</span><br><span class="line">disk size: 196K</span><br><span class="line">cluster_size: 65536</span><br><span class="line">Format specific information:</span><br><span class="line">    compat: 0.10</span><br><span class="line">    refcount bits: 16</span><br><span class="line"></span><br><span class="line">#删除基于目录的存储池的存储卷</span><br><span class="line">[root@centos8 ~]$virsh vol-delete test1.qcow2 vm_images_dir</span><br><span class="line">Vol test1.qcow2 deleted</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$ll &#x2F;data&#x2F;vm_images_dir&#x2F;</span><br><span class="line">total 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="基于LVM的存储池的存储卷管理"><a href="#基于LVM的存储池的存储卷管理" class="headerlink" title="基于LVM的存储池的存储卷管理"></a>基于LVM的存储池的存储卷管理</h3></li>
+<li>*基于LVM的存储池的存储卷是一个块设备**<br>LVM存储池是VG，他的存储卷就是逻辑卷<br>例子：<br>同样的，需要先创建存储池，然后创建存储卷<br>创建存储池<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$virsh pool-define-as vm_images_lvm logical --source-dev&#x3D;&#x2F;dev&#x2F;sdc</span><br><span class="line">Pool vm_images_lvm defined</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh pool-build vm_images_lvm</span><br><span class="line">Pool vm_images_lvm built</span><br><span class="line">[root@centos8 ~]$virsh pool-start vm_images_lvm</span><br><span class="line">Pool vm_images_lvm started</span><br></pre></td></tr></table></figure>
+创建存储卷<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$virsh vol-create-as vm_images_lvm lvmvol1 10G</span><br><span class="line">Vol lvmvol1 created</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh vol-list vm_images_lvm</span><br><span class="line"> Name                 Path</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line"> lvmvol1              &#x2F;dev&#x2F;vm_images_lvm&#x2F;lvmvol1</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$lvs</span><br><span class="line">  LV      VG            Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  lvmvol1 vm_images_lvm -wi-a----- 10.00g</span><br></pre></td></tr></table></figure>
+可以使用创建好的存储卷进行虚拟机的安装，把存储卷当成磁盘去使用就可以了</li>
+</ul>
+<h3 id="克隆存储卷"><a href="#克隆存储卷" class="headerlink" title="克隆存储卷"></a>克隆存储卷</h3><p>克隆只能在同一个存储池内进行，使用命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virsh vol-clone volume_name volume_new_name pool_name</span><br></pre></td></tr></table></figure>
+<p>就可以了</p>
+<h4 id="基于文件的克隆"><a href="#基于文件的克隆" class="headerlink" title="基于文件的克隆"></a>基于文件的克隆</h4><h4 id="基于逻辑卷的克隆"><a href="#基于逻辑卷的克隆" class="headerlink" title="基于逻辑卷的克隆"></a>基于逻辑卷的克隆</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$virsh vol-clone lvmvol1 lvmvol2 vm_images_lvm</span><br></pre></td></tr></table></figure>
+<h3 id="向虚拟机添加存储卷"><a href="#向虚拟机添加存储卷" class="headerlink" title="向虚拟机添加存储卷"></a>向虚拟机添加存储卷</h3><p>通过attach-device和attach-disk给现有虚拟机添加存储卷，从而实现给虚拟机添加虚拟磁盘</p>
+<h4 id="attach-device通过XML文件给已有虚拟机添加存储卷"><a href="#attach-device通过XML文件给已有虚拟机添加存储卷" class="headerlink" title="attach-device通过XML文件给已有虚拟机添加存储卷"></a>attach-device通过XML文件给已有虚拟机添加存储卷</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#需要先创建XML配置文件</span><br><span class="line">  1 &lt;disk type&#x3D;&#39;file&#39; device&#x3D;&#39;disk&#39;&gt;</span><br><span class="line">  2 &lt;driver name&#x3D;&#39;qemu&#39; type&#x3D;&#39;qcow2&#39; cache&#x3D;&#39;none&#39;&#x2F;&gt;</span><br><span class="line">  3 &lt;source file&#x3D;&#39;&#x2F;data&#x2F;vm_images_dir&#x2F;test1.qcow2&#39;&#x2F;&gt;</span><br><span class="line">  4 &lt;target dev&#x3D;&#39;vdb&#39;&#x2F;&gt;</span><br><span class="line">  5 &lt;&#x2F;disk&gt;</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$vim disk.xml</span><br><span class="line">[root@centos8 ~]$virsh attach-device centos7.0 disk.xml --persistent</span><br><span class="line">Device attached successfully</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh domblklist centos7.0</span><br><span class="line">Target     Source</span><br><span class="line">------------------------------------------------</span><br><span class="line">vda        &#x2F;dev&#x2F;vm_images_lvm&#x2F;lvmvol1</span><br><span class="line">vdb        &#x2F;data&#x2F;vm_images_dir&#x2F;test1.qcow2</span><br><span class="line">sda        -</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="attach-disk给已有虚拟机添加存储卷"><a href="#attach-disk给已有虚拟机添加存储卷" class="headerlink" title="attach-disk给已有虚拟机添加存储卷"></a>attach-disk给已有虚拟机添加存储卷</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">virsh attach-disk --domain centos7.0 --sourcetype block --source &#x2F;dev&#x2F;vm_images_lvm&#x2F;lvmvol1 --target vdb</span><br><span class="line">#--domain是指虚拟机名称</span><br><span class="line">#--sourcetype表示虚拟磁盘类型，lvm类型的就是块设备</span><br><span class="line">#--source表示源文件或设备</span><br><span class="line">#--target表示添加到虚拟机上变成哪个盘</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="离线工具"><a href="#离线工具" class="headerlink" title="离线工具"></a>离线工具</h2><p>不启动虚拟机的情况下，直接访问管理虚拟机对应的磁盘，即离线访问<br>一个虚拟机包含的东西：</p>
+<ul>
+<li>   描述硬件信息的xml文件</li>
+<li>   磁盘文件</li>
+</ul>
+<h3 id="工具安装和使用"><a href="#工具安装和使用" class="headerlink" title="工具安装和使用"></a>工具安装和使用</h3><p>可以使用guestfs工具对磁盘文件进行直接访问<br>软件包：<br>libguestfs-tools<br>几个工具：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$guestfish --ro -a &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8-2.qcow2</span><br><span class="line">#加-i选项，可以自动挂载，-d选项是读写方式</span><br><span class="line">[root@centos8 ~]$guestfish -d centos8-2 -i</span><br><span class="line"></span><br><span class="line">Welcome to guestfish, the guest filesystem shell for</span><br><span class="line">editing virtual machine filesystems and disk images.</span><br><span class="line"></span><br><span class="line">Type: ‘help’ for help on commands</span><br><span class="line">      ‘man’ to read the manual</span><br><span class="line">      ‘quit’ to quit the shell</span><br><span class="line"></span><br><span class="line">Operating system: CentOS Linux release 8.2.2004 (Core)</span><br><span class="line">&#x2F;dev&#x2F;cl&#x2F;root mounted on &#x2F;</span><br><span class="line">&#x2F;dev&#x2F;sda1 mounted on &#x2F;boot</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="网络管理"><a href="#网络管理" class="headerlink" title="网络管理"></a>网络管理</h1><p>官方文档：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;wiki.libvirt.org&#x2F;page&#x2F;VirtualNetworking</span><br></pre></td></tr></table></figure>
+<p>为了实现不同宿主机之间的虚拟机的通信</p>
+<h2 id="Linux网桥实现"><a href="#Linux网桥实现" class="headerlink" title="Linux网桥实现"></a>Linux网桥实现</h2><p>宿主机：virbr0网卡、virbr0-nic网卡<br>每创建一个虚拟机，宿主机就会创建一个网卡，这个网卡一半在虚拟机，一半在宿主机，而且网卡桥接在宿主机的br0网卡，体现出来就是这是一个NAT模式<br>nic：network interface controller</p>
+<p>重点：如何软件实现网桥</p>
+<p>使用命令nmcli connection实现<br>创建网桥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection add type bridge con-name br0 ifname br0</span><br><span class="line">nmcli connection modify br0 ipv4.address 10.0.0.7&#x2F;24 ipv4.method manual</span><br><span class="line">nmcli connection up br0</span><br></pre></td></tr></table></figure>
+<p>把网卡加入网桥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection add type bridge-slave con-name br0-port0 ifname eth0 master br0</span><br><span class="line">nmcli connection add type bridge-slave con-anem br0-port1 ifname eth1 master br0</span><br><span class="line">nmcli connection up br0-port0</span><br><span class="line">nmcli connection up br0-port1</span><br></pre></td></tr></table></figure>
+<p>查看网桥配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-br0</span><br><span class="line">DEVICE&#x3D;br0</span><br><span class="line">NAME&#x3D;br0</span><br><span class="line">STP&#x3D;yes</span><br><span class="line">TYPE&#x3D;Bridge</span><br><span class="line">BOOTPROTO&#x3D;static</span><br><span class="line">IPADDR&#x3D;10.0.0.7</span><br><span class="line">PREFIX&#x3D;24</span><br></pre></td></tr></table></figure>
+<p>查看网卡配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-br0-port0</span><br><span class="line">DEVICE&#x3D;eth0</span><br><span class="line">NAME&#x3D;br0-port0</span><br><span class="line">TYPE&#x3D;Ethernet</span><br><span class="line">ONBOOT&#x3D;yes</span><br><span class="line">BRIDGE&#x3D;br0</span><br></pre></td></tr></table></figure>
+<p>通过命令工具查看网桥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">brctl show</span><br><span class="line">ip link show master br0</span><br><span class="line">bridge link show</span><br></pre></td></tr></table></figure>
+<p>删除网桥</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection down br0</span><br><span class="line">rm -f &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-br0*</span><br><span class="line">nmcli connection reload</span><br></pre></td></tr></table></figure>
+<h2 id="qemu-kvm支持的网络"><a href="#qemu-kvm支持的网络" class="headerlink" title="qemu-kvm支持的网络"></a>qemu-kvm支持的网络</h2><p>虚拟机的网络模式：</p>
+<ul>
+<li>   基于NAT的虚拟网络，这是virt-install的默认模式</li>
+<li>   基于自定义桥接的虚拟网络</li>
+<li>   用户自定义的隔离的虚拟网络</li>
+<li>   直接分配物理网络设备，性能好<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection show ifname</span><br><span class="line">dhcp软件：dnsmasq；dhcp端口67,68，UDP</span><br><span class="line">ip link show master virbr0</span><br><span class="line">brctl show </span><br><span class="line">bridge link show </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="默认的网络配置NAT模式"><a href="#默认的网络配置NAT模式" class="headerlink" title="默认的网络配置NAT模式"></a>默认的网络配置NAT模式</h2>在libvirtd服务启动后，会在宿主机的nat表中添加规则<br>NAT模式的问题：不同宿主机的虚拟机之间不能通信<br>这个libvirt的中间存在什么？防火墙(NAT)，DHCP(分配IP)，DNS<br>图片：</li>
+</ul>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201111095115933.png" alt="image-20201111095115933"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">virsh domifaddr name</span><br><span class="line">virsh domifstat name</span><br><span class="line">virsh domiflist name</span><br></pre></td></tr></table></figure>
+<p>查看dnsmasq信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$cat &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;dnsmasq&#x2F;default.conf</span><br><span class="line">##WARNING:  THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE</span><br><span class="line">##OVERWRITTEN AND LOST.  Changes to this configuration should be made using:</span><br><span class="line">##    virsh net-edit default</span><br><span class="line">## or other application using the libvirt API.</span><br><span class="line">##</span><br><span class="line">## dnsmasq conf file created by libvirt</span><br><span class="line">strict-order</span><br><span class="line">pid-file&#x3D;&#x2F;var&#x2F;run&#x2F;libvirt&#x2F;network&#x2F;default.pid</span><br><span class="line">except-interface&#x3D;lo</span><br><span class="line">bind-dynamic</span><br><span class="line">interface&#x3D;virbr0</span><br><span class="line">dhcp-range&#x3D;192.168.122.2,192.168.122.254</span><br><span class="line">dhcp-no-override</span><br><span class="line">dhcp-authoritative</span><br><span class="line">dhcp-lease-max&#x3D;253</span><br><span class="line">dhcp-hostsfile&#x3D;&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;dnsmasq&#x2F;default.hostsfile</span><br><span class="line">addn-hosts&#x3D;&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;dnsmasq&#x2F;default.addnhosts</span><br></pre></td></tr></table></figure>
+<p>查看虚拟机网络信息命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$virsh domiflist centos8</span><br><span class="line">Interface  Type       Source     Model       MAC</span><br><span class="line">-------------------------------------------------------</span><br><span class="line">vnet0      network    default    virtio      52:54:00:52:71:7a</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh domifaddr centos8</span><br><span class="line"> Name       MAC address          Protocol     Address</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line"> vnet0      52:54:00:52:71:7a    ipv4         192.168.122.172&#x2F;24</span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$virsh domifstat centos8 vnet0</span><br><span class="line">vnet0 rx_bytes 3078703</span><br><span class="line">vnet0 rx_packets 13234</span><br><span class="line">vnet0 rx_errs 0</span><br><span class="line">vnet0 rx_drop 0</span><br><span class="line">vnet0 tx_bytes 89990</span><br><span class="line">vnet0 tx_packets 1349</span><br><span class="line">vnet0 tx_errs 0</span><br><span class="line">vnet0 tx_drop 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="配置虚拟机网卡桥接到宿主机的物理网卡"><a href="#配置虚拟机网卡桥接到宿主机的物理网卡" class="headerlink" title="配置虚拟机网卡桥接到宿主机的物理网卡"></a>配置虚拟机网卡桥接到宿主机的物理网卡</h2><p>配置虚拟机桥接到宿主机的eth0网卡上，而不是默认的NAT到virbr0网卡<br>这样每个虚拟机之间可以互相通信<br>通过virt-manager图形化操作<br>有个问题，虚拟机和宿主机之间为什么使用IP互相ping不通？明明虚拟机可以与其他宿主机通信？</p>
+<h2 id="基于自定义网桥的虚拟网络"><a href="#基于自定义网桥的虚拟网络" class="headerlink" title="基于自定义网桥的虚拟网络"></a>基于自定义网桥的虚拟网络</h2><p>与上面的模式相比，这个模式路径短一些，可能这就是使用这个模式更多的原因？<br>最常用的方式，这个模式可以让运行在宿主机上的虚拟机使用和宿主机相同网段的IP，并且可以从外部直接访问到虚拟机。</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201111095027971.png" alt="image-20201111095027971"></p>
+<p>自建网桥：</p>
+<ul>
+<li>   使用命令行</li>
+<li>   编写配置文件<br>命令行：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection add type bridge con-name virbr1 ifname virbr1</span><br><span class="line">nmcli connection modify virbr1 ipv4.address 10.0.0.8&#x2F;24 ipv4.method manual</span><br><span class="line"></span><br><span class="line">nmcli connection add type bridge-slave con-name eth0 ifname eth0 master virbr1</span><br><span class="line">nmcli connection up virbr1</span><br><span class="line">nmcli connection up eth0</span><br></pre></td></tr></table></figure>
+编写配置文件：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-virbr1</span><br><span class="line"></span><br><span class="line">  1 TYPE&#x3D;Bridge</span><br><span class="line">  2 NAME&#x3D;virbr1</span><br><span class="line">  3 DEVICE&#x3D;virbr1</span><br><span class="line">  4 ONBOOT&#x3D;yes</span><br><span class="line">  5 BOOTPROTO&#x3D;static</span><br><span class="line">  6 IPADDR&#x3D;10.0.0.8</span><br><span class="line">  7 PREFIX&#x3D;24</span><br><span class="line">  8 GATEWAY&#x3D;10.0.0.1</span><br><span class="line">  9 DNS1&#x3D;223.5.5.5</span><br><span class="line"> 10 DNS2&#x3D;180.76.76.76</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@centos8 ~]$vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0</span><br><span class="line"></span><br><span class="line">  1 TYPE&#x3D;Ethernet</span><br><span class="line">  2 NAME&#x3D;eth0</span><br><span class="line">  3 DEVICE&#x3D;eth0</span><br><span class="line">  4 ONBOOT&#x3D;yes</span><br><span class="line">  5 BRIDGE&#x3D;virbr1</span><br></pre></td></tr></table></figure>
+配置完成后，当前的宿主机网络环境<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link&#x2F;loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1&#x2F;8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1&#x2F;128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel master virbr1 state UP group default qlen 1000</span><br><span class="line">    link&#x2F;ether 00:0c:29:6e:5e:4c brd ff:ff:ff:ff:ff:ff</span><br><span class="line">3: virbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether 52:54:00:22:51:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.122.1&#x2F;24 brd 192.168.122.255 scope global virbr0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">4: virbr0-nic: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc fq_codel master virbr0 state DOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether 52:54:00:22:51:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">7: virbr1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000</span><br><span class="line">    link&#x2F;ether 00:0c:29:6e:5e:4c brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.0.8&#x2F;24 brd 10.0.0.255 scope global noprefixroute virbr1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::20c:29ff:fe6e:5e4c&#x2F;64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+测试：使用配置过桥接的宿主机来通过cobbler服务器安装虚拟机</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#创建磁盘，注意啊，这个磁盘空间要跟cobbler的应答文件里写的一样才行</span><br><span class="line">[root@centos8 ~]$qemu-img create -f qcow2 &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8-pxe.qcow2 200G</span><br><span class="line">#开始安装，注意，下面的所有选项都有他的意义；cobbler的应答文件中的磁盘要从sda变成vda</span><br><span class="line">[root@centos8 ~]$virt-install --virt-type kvm --name centos8-pxe --ram 2048 --vcpus 2 --disk bus&#x3D;virtio,path&#x3D;&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;centos8-pxe.qcow2 --network&#x3D;bridge:virbr1,model&#x3D;virtio --pxe</span><br><span class="line">#--disk bus&#x3D;virtio 这个选项必须有，否则vda没有意义，也就是说，因为virtio才有的vda</span><br><span class="line">#--network&#x3D;bridge:virbr1,model&#x3D;virtio 这里面的virbr1是宿主机桥接网卡的名字，model&#x3D;virtio是表示使用virtio半虚拟化的网卡</span><br><span class="line">#--pxe表示使用pxe安装</span><br></pre></td></tr></table></figure>
+<p>成功！<br>这样单独配置一个桥接网卡的方式，虚拟机与宿主机是可以ping通的，也可以访问互联网</p>
+<p>把之前生成的虚拟机进行克隆<br>使用virt-manager克隆就行</p>
+<p>使用qemu-img的方式也可以，之间复制qcow2文件，然后用这个文件启动</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp 模板.qcow2 123.qcow2</span><br><span class="line">virt-install --virt-type kvm --name 123 --ram 2048 --vcpus 2 --disk bus&#x3D;virtio,path&#x3D;&#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;123.qcow2 --network:bridge&#x3D;virbr1,model&#x3D;virtio --boot hd</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="用户自定义的隔离的虚拟网络"><a href="#用户自定义的隔离的虚拟网络" class="headerlink" title="用户自定义的隔离的虚拟网络"></a>用户自定义的隔离的虚拟网络</h2><p>只有虚拟机和虚拟机、虚拟机和宿主机之间可以通信，其他都不能通信<br>类似VMware的仅主机模式<br>需要使用virt-manager去配置，在网络配置那里添加一个新的isolated网络就可以</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201111094930736.png" alt="image-20201111094930736"></p>
+<p>配置完成后宿主机的IP</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link&#x2F;loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1&#x2F;8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1&#x2F;128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel master virbr1 state UP group default qlen 1000</span><br><span class="line">    link&#x2F;ether 00:0c:29:6e:5e:4c brd ff:ff:ff:ff:ff:ff</span><br><span class="line">3: virbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether 52:54:00:22:51:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.122.1&#x2F;24 brd 192.168.122.255 scope global virbr0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">4: virbr0-nic: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc fq_codel master virbr0 state DOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether 52:54:00:22:51:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">7: virbr1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000</span><br><span class="line">    link&#x2F;ether 00:0c:29:6e:5e:4c brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.0.8&#x2F;24 brd 10.0.0.255 scope global noprefixroute virbr1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::20c:29ff:fe6e:5e4c&#x2F;64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">15: vnet0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel master virbr1 state UNKNOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether fe:54:00:b2:a4:1d brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet6 fe80::fc54:ff:feb2:a41d&#x2F;64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">16: virbr2: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000</span><br><span class="line">    link&#x2F;ether 52:54:00:9f:0e:a8 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.100.1&#x2F;24 brd 192.168.100.255 scope global virbr2</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">17: virbr2-nic: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc fq_codel master virbr2 state DOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether 52:54:00:9f:0e:a8 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">18: vnet1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel master virbr2 state UNKNOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether fe:54:00:35:26:10 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet6 fe80::fc54:ff:fe35:2610&#x2F;64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">19: vnet2: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel master virbr2 state UNKNOWN group default qlen 1000</span><br><span class="line">    link&#x2F;ether fe:54:00:32:c5:fc brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet6 fe80::fc54:ff:fe32:c5fc&#x2F;64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="操作案例"><a href="#操作案例" class="headerlink" title="操作案例"></a>操作案例</h1><h2 id="连接NAS共享存储实现虚拟机实时迁移"><a href="#连接NAS共享存储实现虚拟机实时迁移" class="headerlink" title="连接NAS共享存储实现虚拟机实时迁移"></a>连接NAS共享存储实现虚拟机实时迁移</h2><p>环境：三台主机，一台NFS，两台宿主机，每台宿主机都要做自定义的桥接模式，一样的网络配置，每台宿主机版本最好一致，如果不一致，最好从低版本迁移到高版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">10.0.0.8</span><br><span class="line">10.0.0.18</span><br><span class="line">10.0.0.4 NFS</span><br></pre></td></tr></table></figure>
+<p>步骤：<br>1.配置NFS服务器的共享文件<br>2.配置两台宿主机，需要做好自定义的桥接、安装好虚拟机<br>3.把原本位于/var/lib/libvirt/images/下的文件先移走，然后都挂载nfs<br>4.迁移</p>
+<p>1.配置NFS</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">yum install nfs-utils</span><br><span class="line">vim &#x2F;etc&#x2F;exports</span><br><span class="line">  1 &#x2F;data&#x2F;share    *(rw,no_root_squash,no_all_squash,sync)</span><br><span class="line">systemctl start nfs</span><br><span class="line">mkdir -p &#x2F;data&#x2F;share</span><br><span class="line">exportfs -r</span><br><span class="line">exportfs -v</span><br><span class="line">&#x2F;data&#x2F;share     &lt;world&gt;(sync,wdelay,hide,no_subtree_check,sec&#x3D;sys,rw,secure,no_root_squash,no_all_squash)</span><br></pre></td></tr></table></figure>
+<p>2.两台宿主机的桥接配置<br>桥接配置的时候，命令行和配置文件都可以，结合使用比较好<br>虚拟机的安装参考之前的方法，拷贝、PXE都很快</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$nmcli c add type bridge con-name virbr1 ifname virbr1 ipv4.address 10.0.0.18&#x2F;24 ipv4.method manual</span><br><span class="line">#然后需要添加eth0网卡到网桥中，这个时候之间去修改eth0的配置文件，别用命令，因为可能修改不进去</span><br><span class="line">vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0</span><br><span class="line">  1 DEVICE&#x3D;eth0</span><br><span class="line">  2 NAME&#x3D;eth0</span><br><span class="line">  3 ONBOOT&#x3D;yes</span><br><span class="line">  4 TYPE&#x3D;Ethernet</span><br><span class="line">  5 BRIDGE&#x3D;virbr1</span><br><span class="line">然后使用命令启动两个网卡</span><br><span class="line">nmcli connection up virbr1</span><br><span class="line">nmcli connection up eth0</span><br><span class="line"></span><br><span class="line">#配置完的网桥配置文件</span><br><span class="line">[root@centos8 ~]$vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-virbr1</span><br><span class="line"></span><br><span class="line">  1 STP&#x3D;yes</span><br><span class="line">  2 BRIDGING_OPTS&#x3D;priority&#x3D;32768</span><br><span class="line">  3 TYPE&#x3D;Bridge</span><br><span class="line">  4 PROXY_METHOD&#x3D;none</span><br><span class="line">  5 BROWSER_ONLY&#x3D;no</span><br><span class="line">  6 BOOTPROTO&#x3D;none</span><br><span class="line">  7 DEFROUTE&#x3D;yes</span><br><span class="line">  8 IPV4_FAILURE_FATAL&#x3D;no</span><br><span class="line">  9 IPV6INIT&#x3D;yes</span><br><span class="line"> 10 IPV6_AUTOCONF&#x3D;yes</span><br><span class="line"> 11 IPV6_DEFROUTE&#x3D;yes</span><br><span class="line"> 12 IPV6_FAILURE_FATAL&#x3D;no</span><br><span class="line"> 13 IPV6_ADDR_GEN_MODE&#x3D;stable-privacy</span><br><span class="line"> 14 NAME&#x3D;virbr1</span><br><span class="line"> 15 UUID&#x3D;53710e51-3eba-4a02-9672-582527341f92</span><br><span class="line"> 16 DEVICE&#x3D;virbr1</span><br><span class="line"> 17 ONBOOT&#x3D;yes</span><br><span class="line"> 18 IPADDR&#x3D;10.0.0.18</span><br><span class="line"> 19 PREFIX&#x3D;24</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>3.转移文件，挂载NFS文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 ~]$mkdir -p &#x2F;data&#x2F;tmp</span><br><span class="line">[root@centos8 ~]$mv &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;* &#x2F;data&#x2F;tmp</span><br><span class="line"></span><br><span class="line">#挂载使用图形工具virt-manager，挂载完成后再把文件移动回去</span><br><span class="line"></span><br><span class="line">mv &#x2F;data&#x2F;tmp&#x2F;* &#x2F;var&#x2F;lib&#x2F;libvirt&#x2F;images&#x2F;</span><br></pre></td></tr></table></figure>
+<p>4.进行迁移，使用virt-manager图形化工具<br>在迁移之前，需要给两个宿主机做ssh的key验证<br>迁移的时候需要勾选上unsafe选项，否则迁移失败</p>
+<h2 id="多网卡绑定操作"><a href="#多网卡绑定操作" class="headerlink" title="多网卡绑定操作"></a>多网卡绑定操作</h2><p>容错、提高带宽</p>
+<p>将多块网卡绑定同一IP地址对外提供服务，可以实现高可用或者负载均衡，直接给两块网卡同一IP地址是不可以的，需要通过bongding，虚拟一块网卡对外提供链接，物理网卡被修改为相同的MAC地址</p>
+<p>Bonding工作模式：</p>
+<p>一共7种工作模式，0-6</p>
+<ul>
+<li>Mode 0（balance-rr）：轮询（Round-robin）策略，从头到尾顺序的在每一个slave接口上面发送数据包。提供负载均衡和容错的能力</li>
+<li>Mode 1（active-backup）：活动-备份策略，只有一个slave被激活，当且仅当活动的slave接口失败时才会激活其他slave，为了避免交换机发生混乱，此时绑定的MAC地址只有一个外部端口上可见</li>
+<li>Mode 3（broadcast）：广播策略，在所有slave接口上传送所有的报文，提供容错能力</li>
+</ul>
+<p>说明：active-backup、balance-backup和balance-alb模式不需要交换机的任何特殊配置，其他绑定模式需要配置交换机以便整合连接</p>
+<p>Bonding配置</p>
+<p>文档：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;www.kernel.org&#x2F;doc&#x2F;Documentation&#x2F;networking&#x2F;bonding.txt</span><br></pre></td></tr></table></figure>
+
+<p>两种实现方式：</p>
+<p>1.写配置文件实现</p>
+<p>创建bonding设备的配置文件，相当于把bond0当做一个物理网卡，IP什么的都在他这里配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-bond0</span><br><span class="line">  1 NAME&#x3D;bond0</span><br><span class="line">  2 TYPE&#x3D;bond</span><br><span class="line">  3 DEVICE&#x3D;bond0</span><br><span class="line">  4 BOOTPROTO&#x3D;none</span><br><span class="line">  5 BONDING_OPTS&#x3D;&quot;mode&#x3D;1 miimon&#x3D;100&quot;</span><br><span class="line">  </span><br><span class="line">vim ifcfg-eth0</span><br><span class="line">  1 TYPE&#x3D;Ethernet</span><br><span class="line">  2 NAME&#x3D;eth0</span><br><span class="line">  3 DEVICE&#x3D;eth0</span><br><span class="line">  4 ONBOOT&#x3D;yes</span><br><span class="line">  5 MASTER&#x3D;bond0</span><br><span class="line">  6 SLAVE&#x3D;yes</span><br><span class="line">  </span><br><span class="line">vim ifcfg-eth1  </span><br><span class="line">  1 TYPE&#x3D;Ethernet</span><br><span class="line">  2 NAME&#x3D;eth1</span><br><span class="line">  3 DEVICE&#x3D;eth1</span><br><span class="line">  4 ONBOOT&#x3D;yes</span><br><span class="line">  5 MASTER&#x3D;bond0</span><br><span class="line">  6 SLAVE&#x3D;yes</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2.命令行实现</p>
+<p>我感觉，最好要先创建出来每个网卡的配置文件ifcfg-eth0这样的，然后再使用命令行工具，这样可以知道改了什么配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#添加一个绑定网卡，这个命令没有添加IP地</span><br><span class="line">nmcli connection add type bond con-name bond1 ifname bond1 mode active-backup </span><br><span class="line"></span><br><span class="line">#把单个网卡添加到绑定网卡中</span><br><span class="line">nmcli connection add type bond-slave ifname eth2 master bond1</span><br><span class="line">nmcli connection add type bond-slave ifname eth3 master bond1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如果要桥接，还需要把绑定的网卡添加到桥接网卡上</p>
+<p>查看桥接的方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bridge link show</span><br></pre></td></tr></table></figure>
+
+<p>查看绑定的方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;proc&#x2F;net&#x2F;bonding&#x2F;bond0</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="内外网络隔离综合"><a href="#内外网络隔离综合" class="headerlink" title="内外网络隔离综合"></a>内外网络隔离综合</h2><p>实现一个外网的web服务和内网的数据库相互隔离的环境<br>两台宿主机host1和host2<br>每个宿主机上面各有两个虚拟机，分别连接外网和内网交换机</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201111094845730.png" alt="image-20201111094845730"></p>
+<p>内网：使用VMware的仅主机模式的网卡，4个</p>
+<p>外网：使用VMware的NAT模式的网卡，4个</p>
+<p>使用两台宿主机，四台虚拟机，最主要的问题就是虚拟机系统的安装、网络的配置</p>
+<p>安装虚拟机的关键点：干净的安装环境、合适的X11server软件、够大的内存</p>
+<p>宿主机网络配置关键点：</p>
+<p>1.网卡绑定</p>
+<p>绑定还是使用配置文件，好理解一些</p>
+<p>2.网卡桥接</p>
+<p>桥接可以使用命令行</p>
+<p>3.绑定和桥接的先后顺序：这两个应该是先绑定、后桥接</p>
+<p>绑定的基本操作单位是网卡，网卡的配置文件中只需要指定自己的bonding网卡</p>
+<p>bonding网卡如果不桥接，那么需要在配置文件中写自己的IP，如果要桥接，那么bonding网卡的配置文件中需要指定桥接网卡，IP不需要写</p>
+<p>桥接网卡的配置文件中一定有IP地址</p>
+<p>下面是两个网卡绑定，然后绑定网卡桥接到桥接网卡的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos8 network-scripts]$ll</span><br><span class="line">total 32</span><br><span class="line">-rw-r--r-- 1 root root  97 Nov 11 15:37 ifcfg-bond0</span><br><span class="line">-rw-r--r-- 1 root root  70 Nov 11 11:30 ifcfg-eth0</span><br><span class="line">-rw-r--r-- 1 root root  70 Nov 11 11:31 ifcfg-eth1</span><br><span class="line">-rw-r--r-- 1 root root 142 Nov 10 17:50 ifcfg-virbr1</span><br></pre></td></tr></table></figure>
+
+<p>下面是两个网卡的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">eth0</span><br><span class="line">  1 TYPE&#x3D;Ethernet</span><br><span class="line">  2 NAME&#x3D;eth0</span><br><span class="line">  3 DEVICE&#x3D;eth0</span><br><span class="line">  4 ONBOOT&#x3D;yes</span><br><span class="line">  5 MASTER&#x3D;bond0</span><br><span class="line">  6 SLAVE&#x3D;yes</span><br><span class="line">eth1</span><br><span class="line">  1 TYPE&#x3D;Ethernet</span><br><span class="line">  2 NAME&#x3D;eth1</span><br><span class="line">  3 DEVICE&#x3D;eth1</span><br><span class="line">  4 ONBOOT&#x3D;yes</span><br><span class="line">  5 MASTER&#x3D;bond0</span><br><span class="line">  6 SLAVE&#x3D;yes</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>下面是绑定网卡的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1 NAME&#x3D;bond0</span><br><span class="line">2 TYPE&#x3D;bond</span><br><span class="line">3 DEVICE&#x3D;bond0</span><br><span class="line">4 BOOTPROTO&#x3D;none</span><br><span class="line">5 BONDING_OPTS&#x3D;&quot;mode&#x3D;1 miimon&#x3D;100&quot;</span><br><span class="line">6 BRIDGE&#x3D;virbr1</span><br></pre></td></tr></table></figure>
+
+<p>下面是桥接网卡的配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> 1 TYPE&#x3D;Bridge</span><br><span class="line"> 2 NAME&#x3D;virbr1</span><br><span class="line"> 3 DEVICE&#x3D;virbr1</span><br><span class="line"> 4 ONBOOT&#x3D;yes</span><br><span class="line"> 5 BOOTPROTO&#x3D;static</span><br><span class="line"> 6 IPADDR&#x3D;10.0.0.8</span><br><span class="line"> 7 PREFIX&#x3D;24</span><br><span class="line"> 8 GATEWAY&#x3D;10.0.0.1</span><br><span class="line"> 9 DNS1&#x3D;223.5.5.5</span><br><span class="line">10 DNS2&#x3D;180.76.76.76</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/18/Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E7%AE%A1%E7%90%86/" rel="prev" title="Linux启动和内核管理">
+      <i class="fa fa-chevron-left"></i> Linux启动和内核管理
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#KVM-%E2%80%94-Kernel-Based-Virtual-Machine"><span class="nav-number">1.</span> <span class="nav-text">KVM — Kernel-Based Virtual Machine</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E8%99%9A%E6%8B%9F%E5%8C%96%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">1 虚拟化基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E8%99%9A%E6%8B%9F%E5%8C%96%E5%87%BA%E7%8E%B0%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 虚拟化出现的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E8%99%9A%E6%8B%9F%E5%8C%96%E5%92%8C%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 虚拟化和虚拟机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E8%99%9A%E6%8B%9F%E5%8C%96%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 虚拟化类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-Hypervisor%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.4.</span> <span class="nav-text">1.4 Hypervisor类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hypervisor%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9A"><span class="nav-number">2.4.1.</span> <span class="nav-text">Hypervisor是什么：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#X86-CPU%E7%9A%84%E4%BF%9D%E6%8A%A4%E7%8E%AF%EF%BC%9A%E9%99%90%E5%88%B6%E4%BB%A3%E7%A0%81%E7%9A%84%E4%BD%9C%E7%94%A8%E8%8C%83%E5%9B%B4"><span class="nav-number">2.4.2.</span> <span class="nav-text">X86 CPU的保护环：限制代码的作用范围</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hypervisor%E5%88%86%E7%B1%BB%EF%BC%9A"><span class="nav-number">2.4.3.</span> <span class="nav-text">Hypervisor分类：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E5%88%86%E7%B1%BB"><span class="nav-number">2.5.</span> <span class="nav-text">1.5 虚拟化技术分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-%E4%BA%91%E8%AE%A1%E7%AE%97"><span class="nav-number">2.6.</span> <span class="nav-text">1.6 云计算</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AFKVM%E6%9E%B6%E6%9E%84%E5%92%8C%E9%83%A8%E7%BD%B2"><span class="nav-number">3.</span> <span class="nav-text">2 虚拟化技术KVM架构和部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-KVM%E6%A6%82%E8%BF%B0"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 KVM概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-KVM%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 KVM宿主机环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KVM%E5%B7%A5%E5%85%B7%E5%8C%85%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.3.</span> <span class="nav-text">KVM工具包介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#libvirt%E5%8C%85"><span class="nav-number">3.3.1.</span> <span class="nav-text">libvirt包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85KVM%E7%9B%B8%E5%85%B3%E5%8C%85"><span class="nav-number">3.3.2.</span> <span class="nav-text">安装KVM相关包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87ISO%E6%96%87%E4%BB%B6"><span class="nav-number">3.3.3.</span> <span class="nav-text">准备ISO文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">4.</span> <span class="nav-text">3 创建虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E4%BD%BF%E7%94%A8virt-manager%E5%9B%BE%E5%BD%A2%E5%8C%96%E5%AE%89%E8%A3%85"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 使用virt-manager图形化安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E4%BD%BF%E7%94%A8virt-install%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%AE%89%E8%A3%85"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 使用virt-install命令行安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85"><span class="nav-number">4.2.1.</span> <span class="nav-text">手动安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8kickstart%E8%87%AA%E5%8A%A8%E5%8C%96%E5%AE%89%E8%A3%85"><span class="nav-number">4.2.2.</span> <span class="nav-text">使用kickstart自动化安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%8E%B0%E6%9C%89%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%96%87%E4%BB%B6%E7%9B%B4%E6%8E%A5%E5%A4%8D%E5%88%B6%E4%B8%80%E4%BB%BD%EF%BC%8C%E7%84%B6%E5%90%8E%E4%BD%BF%E7%94%A8virt-install%E6%88%96%E8%80%85virt-manager%E5%AF%BC%E5%85%A5%E5%B0%B1%E8%A1%8C"><span class="nav-number">4.2.3.</span> <span class="nav-text">使用现有的虚拟机文件直接复制一份，然后使用virt-install或者virt-manager导入就行</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">5.</span> <span class="nav-text">4 管理虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E4%BD%BF%E7%94%A8%E5%8D%8A%E8%99%9A%E6%8B%9F%E5%8C%96%E9%A9%B1%E5%8A%A8-virtio"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 使用半虚拟化驱动 virtio</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E5%AE%89%E8%A3%85QEMU-guest-agent%E5%8A%9F%E8%83%BD"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 安装QEMU guest agent功能</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5"><span class="nav-number">6.</span> <span class="nav-text">5</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-libvirt-%E6%9E%B6%E6%9E%84"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 libvirt 架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-virt-manager-%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 virt-manager 管理虚拟机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-virsh%E5%91%BD%E4%BB%A4"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 virsh命令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">存储管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#KVM%E5%AD%98%E5%82%A8%E6%A8%A1%E5%BC%8F"><span class="nav-number">7.1.</span> <span class="nav-text">KVM存储模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E7%B1%BB%E5%9E%8B"><span class="nav-number">7.2.</span> <span class="nav-text">虚拟磁盘类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">7.3.</span> <span class="nav-text">虚拟镜像文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8qemu-img%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E6%96%87%E4%BB%B6"><span class="nav-number">7.4.</span> <span class="nav-text">使用qemu-img管理虚拟磁盘文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E6%96%87%E4%BB%B6"><span class="nav-number">7.4.1.</span> <span class="nav-text">创建虚拟磁盘文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E5%A4%87%E5%B7%AE%E5%BC%82%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98"><span class="nav-number">7.4.2.</span> <span class="nav-text">后备差异虚拟磁盘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E7%9A%84%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2"><span class="nav-number">7.4.3.</span> <span class="nav-text">虚拟磁盘的格式转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E6%95%B4%E8%99%9A%E6%8B%9F%E7%A3%81%E7%9B%98%E5%A4%A7%E5%B0%8F"><span class="nav-number">7.4.4.</span> <span class="nav-text">调整虚拟磁盘大小</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E5%BF%AB%E7%85%A7"><span class="nav-number">7.5.</span> <span class="nav-text">磁盘快照</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E5%BF%AB%E7%85%A7%E5%88%86%E7%B1%BB"><span class="nav-number">7.5.1.</span> <span class="nav-text">磁盘快照分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu-img-snapshot"><span class="nav-number">7.5.2.</span> <span class="nav-text">qemu-img snapshot</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%81%9A%E5%BF%AB%E7%85%A7%EF%BC%8C%E4%BD%BF%E7%94%A8virsh"><span class="nav-number">7.5.2.1.</span> <span class="nav-text">对虚拟机做快照，使用virsh</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.</span> <span class="nav-text">存储池</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%AD%98%E5%82%A8%E6%B1%A0%E4%BF%A1%E6%81%AF"><span class="nav-number">7.6.1.</span> <span class="nav-text">显示存储池信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%9B%AE%E5%BD%95%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.2.</span> <span class="nav-text">基于目录的存储池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.3.</span> <span class="nav-text">基于文件系统的存储池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%A3%81%E7%9B%98%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.4.</span> <span class="nav-text">基于磁盘的存储池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8ELVM%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.5.</span> <span class="nav-text">基于LVM的存储池</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E6%9D%A5%E6%B2%A1%E6%9C%89%E9%80%BB%E8%BE%91%E5%8D%B7%E7%BB%84%EF%BC%8C%E7%9B%B4%E6%8E%A5%E8%BF%9E%E9%80%BB%E8%BE%91%E5%8D%B7%E7%BB%84%E5%92%8C%E5%AD%98%E5%82%A8%E6%B1%A0%E4%B8%80%E8%B5%B7%E5%88%9B%E5%BB%BA"><span class="nav-number">7.6.5.1.</span> <span class="nav-text">原来没有逻辑卷组，直接连逻辑卷组和存储池一起创建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E5%B7%B2%E5%AD%98%E5%9C%A8%E7%9A%84%E9%80%BB%E8%BE%91%E5%8D%B7%E7%BB%84%E5%88%9B%E5%BB%BA%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.5.2.</span> <span class="nav-text">利用已存在的逻辑卷组创建存储池</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8ENFS%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.6.</span> <span class="nav-text">基于NFS的存储池</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BANFS%E5%85%B1%E4%BA%AB"><span class="nav-number">7.6.6.1.</span> <span class="nav-text">创建NFS共享</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%9F%BA%E4%BA%8ENFS%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0"><span class="nav-number">7.6.6.2.</span> <span class="nav-text">创建基于NFS的存储池</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E5%8D%B7%E7%AE%A1%E7%90%86"><span class="nav-number">7.7.</span> <span class="nav-text">存储卷管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%9B%AE%E5%BD%95%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0%E7%9A%84%E5%AD%98%E5%82%A8%E5%8D%B7%E7%AE%A1%E7%90%86"><span class="nav-number">7.7.1.</span> <span class="nav-text">基于目录的存储池的存储卷管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8ELVM%E7%9A%84%E5%AD%98%E5%82%A8%E6%B1%A0%E7%9A%84%E5%AD%98%E5%82%A8%E5%8D%B7%E7%AE%A1%E7%90%86"><span class="nav-number">7.7.2.</span> <span class="nav-text">基于LVM的存储池的存储卷管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%8B%E9%9A%86%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">7.7.3.</span> <span class="nav-text">克隆存储卷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%8B%E9%9A%86"><span class="nav-number">7.7.3.1.</span> <span class="nav-text">基于文件的克隆</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E9%80%BB%E8%BE%91%E5%8D%B7%E7%9A%84%E5%85%8B%E9%9A%86"><span class="nav-number">7.7.3.2.</span> <span class="nav-text">基于逻辑卷的克隆</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%B7%BB%E5%8A%A0%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">7.7.4.</span> <span class="nav-text">向虚拟机添加存储卷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#attach-device%E9%80%9A%E8%BF%87XML%E6%96%87%E4%BB%B6%E7%BB%99%E5%B7%B2%E6%9C%89%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%B7%BB%E5%8A%A0%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">7.7.4.1.</span> <span class="nav-text">attach-device通过XML文件给已有虚拟机添加存储卷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#attach-disk%E7%BB%99%E5%B7%B2%E6%9C%89%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%B7%BB%E5%8A%A0%E5%AD%98%E5%82%A8%E5%8D%B7"><span class="nav-number">7.7.4.2.</span> <span class="nav-text">attach-disk给已有虚拟机添加存储卷</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A6%BB%E7%BA%BF%E5%B7%A5%E5%85%B7"><span class="nav-number">7.8.</span> <span class="nav-text">离线工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="nav-number">7.8.1.</span> <span class="nav-text">工具安装和使用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86"><span class="nav-number">8.</span> <span class="nav-text">网络管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E7%BD%91%E6%A1%A5%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.1.</span> <span class="nav-text">Linux网桥实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#qemu-kvm%E6%94%AF%E6%8C%81%E7%9A%84%E7%BD%91%E7%BB%9C"><span class="nav-number">8.2.</span> <span class="nav-text">qemu-kvm支持的网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E7%9A%84%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AENAT%E6%A8%A1%E5%BC%8F"><span class="nav-number">8.3.</span> <span class="nav-text">默认的网络配置NAT模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1%E6%A1%A5%E6%8E%A5%E5%88%B0%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%9A%84%E7%89%A9%E7%90%86%E7%BD%91%E5%8D%A1"><span class="nav-number">8.4.</span> <span class="nav-text">配置虚拟机网卡桥接到宿主机的物理网卡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BD%91%E6%A1%A5%E7%9A%84%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C"><span class="nav-number">8.5.</span> <span class="nav-text">基于自定义网桥的虚拟网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84%E9%9A%94%E7%A6%BB%E7%9A%84%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C"><span class="nav-number">8.6.</span> <span class="nav-text">用户自定义的隔离的虚拟网络</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E6%A1%88%E4%BE%8B"><span class="nav-number">9.</span> <span class="nav-text">操作案例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5NAS%E5%85%B1%E4%BA%AB%E5%AD%98%E5%82%A8%E5%AE%9E%E7%8E%B0%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%9E%E6%97%B6%E8%BF%81%E7%A7%BB"><span class="nav-number">9.1.</span> <span class="nav-text">连接NAS共享存储实现虚拟机实时迁移</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BD%91%E5%8D%A1%E7%BB%91%E5%AE%9A%E6%93%8D%E4%BD%9C"><span class="nav-number">9.2.</span> <span class="nav-text">多网卡绑定操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%A4%96%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB%E7%BB%BC%E5%90%88"><span class="nav-number">9.3.</span> <span class="nav-text">内外网络隔离综合</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">huihui</p>
+  <div class="site-description" itemprop="description">学习和看笔记</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">الوسوم</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">huihui</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

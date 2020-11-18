@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Linux Virtual ServerLVS：负载均衡服务器 Linux Virtual Server 尝试使用80&#x2F;20方法进行LVS的学习，得分步骤做：80%的需要是在20%的内容中的 LVS的重要的20%是：  LVS的工作原理 LVS-DR模型的实现方法 LVS-DR的实际操作  内容： 集群概念 LVS模型 LVS调度算法 LVS实现 Idirectord  1.集群和分布式系统性能扩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LVS">
+<meta property="og:url" content="http://example.com/2020/11/18/LVS/index.html">
+<meta property="og:site_name" content="辉辉的数据库">
+<meta property="og:description" content="Linux Virtual ServerLVS：负载均衡服务器 Linux Virtual Server 尝试使用80&#x2F;20方法进行LVS的学习，得分步骤做：80%的需要是在20%的内容中的 LVS的重要的20%是：  LVS的工作原理 LVS-DR模型的实现方法 LVS-DR的实际操作  内容： 集群概念 LVS模型 LVS调度算法 LVS实现 Idirectord  1.集群和分布式系统性能扩">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105223908434.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105224836162.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105231944974.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201106082943359.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105153045726.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105161821292.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105174819989.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105191226209.png">
+<meta property="article:published_time" content="2020-11-18T00:48:10.000Z">
+<meta property="article:modified_time" content="2020-11-18T13:59:43.205Z">
+<meta property="article:author" content="huihui">
+<meta property="article:tag" content="notes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20201105223908434.png">
+
+<link rel="canonical" href="http://example.com/2020/11/18/LVS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-cn'
+  };
+</script>
+
+  <title>LVS | 辉辉的数据库</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="تشغيل شريط التصفح">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">辉辉的数据库</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">我们要丈量大地！</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>الأرشيفات</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/LVS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="huihui">
+      <meta itemprop="description" content="学习和看笔记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="辉辉的数据库">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LVS
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+              
+
+              <time title="أُنشأ: 2020-11-18 08:48:10 / عُدل: 21:59:43" itemprop="dateCreated datePublished" datetime="2020-11-18T08:48:10+08:00">2020-11-18</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Linux-Virtual-Server"><a href="#Linux-Virtual-Server" class="headerlink" title="Linux Virtual Server"></a>Linux Virtual Server</h1><p>LVS：负载均衡服务器</p>
+<p>Linux Virtual Server</p>
+<p>尝试使用80/20方法进行LVS的学习，得分步骤做：80%的需要是在20%的内容中的</p>
+<p>LVS的重要的20%是：</p>
+<ul>
+<li>LVS的工作原理</li>
+<li>LVS-DR模型的实现方法</li>
+<li>LVS-DR的实际操作</li>
+</ul>
+<h2 id="内容："><a href="#内容：" class="headerlink" title="内容："></a>内容：</h2><ul>
+<li><strong>集群概念</strong></li>
+<li><strong>LVS模型</strong></li>
+<li><strong>LVS调度算法</strong></li>
+<li><strong>LVS实现</strong></li>
+<li><strong>Idirectord</strong></li>
+</ul>
+<h1 id="1-集群和分布式"><a href="#1-集群和分布式" class="headerlink" title="1.集群和分布式"></a>1.集群和分布式</h1><p>系统性能扩展方式：</p>
+<ul>
+<li>Scale Up：垂直扩展，向上扩展，增强单个服务器的性能</li>
+<li>Scale Out：水平扩展，向外扩展，增加更多设备</li>
+</ul>
+<p>水平扩展更合适，性价比高，所以需要一个调度器</p>
+<h2 id="1-1-集群-Cluster"><a href="#1-1-集群-Cluster" class="headerlink" title="1.1 集群 Cluster"></a>1.1 集群 Cluster</h2><p>Cluster分为三个类型</p>
+<ul>
+<li><p>LB：Load Balancing 负载均衡，多个主机组成，每个主机只承担一部分访问请求</p>
+</li>
+<li><p>HA：High Availiablity，高可用，避免单点失败问题</p>
+<p>考核指标：MTBF：Mean Time Between failure 平均无故障时间，即正常时间</p>
+<p>MTTR：Mean Time To Restoration  平均恢复前时间，即故障时间</p>
+<p>故障时间 / 全部时间    的比值，99% 99.9% 99.99% 99.999%，按年来算</p>
+<p>SLA：服务等级协议，就是看你能有几个9</p>
+<p>计划外的停机时间是我们需要关注的</p>
+</li>
+<li><p>HPC：</p>
+</li>
+</ul>
+<h2 id="1-2-分布式系统"><a href="#1-2-分布式系统" class="headerlink" title="1.2 分布式系统"></a>1.2 分布式系统</h2><p>分布式存储：Ceph，Gluster，FastDFS，MogileFS</p>
+<p>分布式计算：Hadoop，Spark</p>
+<p>1.3 集群和分布式的区别</p>
+<p>1.4 集群设计原则</p>
+<p>1.5 集群涉及实现</p>
+<p>1.5.1 基础设施层面</p>
+<p>1.5.2 业务层面</p>
+<h2 id="1-6-LB-Cluster-负载均衡集群"><a href="#1-6-LB-Cluster-负载均衡集群" class="headerlink" title="1.6 LB Cluster 负载均衡集群"></a>1.6 LB Cluster 负载均衡集群</h2><p>1.6.1 实现方式</p>
+<ul>
+<li>硬件实现</li>
+<li>软件</li>
+</ul>
+<h1 id="2-LVS"><a href="#2-LVS" class="headerlink" title="2.LVS"></a>2.LVS</h1><p>LVS工作原理：LVS是内核级功能，工作在INPUT链的位置，将发往INPUT链的数据报文根据目标IP和目标端口及协议将其调度转发到真实的业务服务器上，转发的依据是多种调度算法</p>
+<p>查看内核对LVS的支持：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ grep -i -C 10 ipvs /boot/config-3.10.0-1127.el7.x86_64</span><br><span class="line"><span class="comment"># IPVS transport protocol load balancing support    #支持的协议</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">CONFIG_IP_VS_PROTO_TCP=y</span><br><span class="line">CONFIG_IP_VS_PROTO_UDP=y</span><br><span class="line">CONFIG_IP_VS_PROTO_AH_ESP=y</span><br><span class="line">CONFIG_IP_VS_PROTO_ESP=y</span><br><span class="line">CONFIG_IP_VS_PROTO_AH=y</span><br><span class="line">CONFIG_IP_VS_PROTO_SCTP=y</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># IPVS scheduler    #调度算法</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">CONFIG_IP_VS_RR=m</span><br><span class="line">CONFIG_IP_VS_WRR=m</span><br><span class="line">CONFIG_IP_VS_LC=m</span><br><span class="line">CONFIG_IP_VS_WLC=m</span><br><span class="line">CONFIG_IP_VS_LBLC=m</span><br><span class="line">CONFIG_IP_VS_LBLCR=m</span><br><span class="line">CONFIG_IP_VS_DH=m</span><br><span class="line">CONFIG_IP_VS_SH=m</span><br><span class="line">CONFIG_IP_VS_SED=m</span><br><span class="line">CONFIG_IP_VS_NQ=m</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># IPVS SH scheduler</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">CONFIG_IP_VS_SH_TAB_BITS=8</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># IPVS application helper</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">CONFIG_IP_VS_FTP=m</span><br><span class="line">CONFIG_IP_VS_NFCT=y</span><br><span class="line">CONFIG_IP_VS_PE_SIP=m</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="LVS集群中的术语"><a href="#LVS集群中的术语" class="headerlink" title="LVS集群中的术语"></a>LVS集群中的术语</h2><p>VS：Virtual Server，Load Balancer</p>
+<p>RS：Real Server(LSV)，upstream server(nginx)，backend server(haproxy)</p>
+<p>CIP：Client Server</p>
+<p>VIP：Virtual server IP，面对用户的IP</p>
+<p>DIP：Director IP，面对业务服务器的IP</p>
+<p>RIP：Real Server IP</p>
+<p>访问流程：CIP–&gt;VIP–&gt;DIP–&gt;RIP</p>
+<h2 id="LVS工作模式和相关命令"><a href="#LVS工作模式和相关命令" class="headerlink" title="LVS工作模式和相关命令"></a>LVS工作模式和相关命令</h2><p>TCP/IP在各个层数据单位是什么？</p>
+<p>应用层：报文</p>
+<p>传输层：报文段</p>
+<p>网络层：数据包</p>
+<p>链路层：帧</p>
+<h3 id="1-LVS集群的工作模式"><a href="#1-LVS集群的工作模式" class="headerlink" title="1 LVS集群的工作模式"></a>1 LVS集群的工作模式</h3><ul>
+<li>lvs-nat：本质是多目标IP的DNAT；重点：对报文的修改！</li>
+<li>lvs-dr：Direct Routing 直接路由，基于数据链路层的MAC地址进行修改</li>
+<li>lvs-tun：tunnel，隧道，在原请求的IP报文之外新添加一个IP首部</li>
+<li>lvs-fullnat：修改请求报文的源和目标IP</li>
+</ul>
+<h4 id="LVS-NAT"><a href="#LVS-NAT" class="headerlink" title="LVS-NAT"></a>LVS-NAT</h4><p>本质：是多目标IP的DNAT，通过将请求报文中的目标地址和目标端口修改为根据调度算法选择出的一个RS的RIP和Port实现转发；同时把从RS回来的响应报文的目标地址和目标端口修改为客户端的IP和端口</p>
+<p>特征：</p>
+<blockquote>
+<p>1.RIP和DIP应该在同一个IP网络，且应该使用私网地址；RS的网关要指向DIP</p>
+<p>2.请求报文和响应报文都必须经由Director转发，因此Director容易成为系统瓶颈</p>
+<p>3.支持端口映射，可以修改请求报文的目标Port</p>
+<p>4.因为使用的技术是Linux的内核技术LVS，因此Director必须是Linux操作系统，RS可以是任意系统</p>
+<p>5.Director需要开启FORWORD选项，net.ipv4.ip_forward</p>
+</blockquote>
+<p>画报文图，应该画两个，去方向一个图，回方向一个图</p>
+<p>请求报文流程图：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105223908434.png" alt="image-20201105223908434"></p>
+<p>响应报文流程图：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105224836162.png" alt="image-20201105224836162"></p>
+<h4 id="LVS-DR：最主流的使用模型、默认的模型"><a href="#LVS-DR：最主流的使用模型、默认的模型" class="headerlink" title="LVS-DR：最主流的使用模型、默认的模型"></a>LVS-DR：最主流的使用模型、默认的模型</h4><p>Direct Routing</p>
+<p>工作方式：通过为请求报文重新封装一个MAC首部进行转发，源MAC是DIP所在的接口的MAC，目标MAC是根据调试算法挑选出的RS的RIP所在接口的MAC地址，需要注意的是，源IP/PORT以及目标IP/PORT是在整个请求过程中是不被改变的；当RS发送响应报文时，根本不经过Director，而是自己把这个响应报文发送给路由器，由路由器把响应报文发给客户端</p>
+<p>特点：</p>
+<blockquote>
+<p>1.DR模型可以降低LVS的负载压力，因为回复报文不需要经过LVS了</p>
+<p>2.需要确保前端的路由器将目标IP为VIP的请求报文真的发送给Director而不是具有相同VIP的RS，方法大体上有三种：</p>
+<p>​    1）在前端的路由器上做静态的IP和MAC地址的绑定，把VIP绑定到Director的MAC地址</p>
+<p>​    2）在RS上使用arptables工具</p>
+<p>​    3）在RS上修改内核参数，本质上是对绑定了VIP的网卡的arp协议的广播和接收进行了关闭</p>
+<p>​    修改的参数是：/proc/sys/net/ipv4/conf/all/arp_ignore</p>
+<p>​                 /proc/sys/net/ipv4/conf/all/arp_announce</p>
+<p>​    上面的参数是对一个主机的arp的总开关，对于我们需要真正要修改的、VIP的网卡还需要开小开关</p>
+<p>​                 /proc/sys/net/ipv4/conf/lo/arp_ignore</p>
+<p>​                 /prof/sys/net/ipv4/conf/lo/arp_announce</p>
+<p>3.RS的RIP可以使用私网地址，也可以是公网地址，只要RIP和DIP在同一个网络就行；RIP的网关不能指向DIP，以确保响应报文不会经由Director</p>
+<p>4.RS和Director要在同一个物理网络</p>
+<p>5.请求报文要经由Director，但响应报文不经由Director，而是由RS之间发送给路由器，路由器再发送给客户端</p>
+<p>6.因为是对数据链路层的MAC地址的改变，因此不支持端口映射</p>
+<p>7.Director不需要开启路由转发，因为数据不经过他的FORWARD链</p>
+<p>8.因为使用的技术是Linux的内核技术LVS，因此Director必须是Linux操作系统，RS可以是大多数系统</p>
+</blockquote>
+<p>LVS-DR模型中的重点问题：</p>
+<blockquote>
+<p>如何解决IP地址冲突问题？—&gt;地址冲突是因为arp的广播和接收，导致每个主机都会通知其他主机自己的IP和MAC的对应关系，而通过修改内核参数，关闭RS的arp广播和接收选项，而Director正常广播自己的VIP和MAC的对应关系，这样就不冲突了</p>
+<p>支持端口映射吗？—&gt;LVS-DR模型只修改数据链路层，因此不支持端口映射；</p>
+<p>为什么Director和RS之间必须在交换机环境，不可以有路由器？—&gt;因为LVS-DR模型是Director通过对请求报文中MAC地址的修改进行转发和调度的，而在转发的过程中是把目标MAC从Director改成了RS的MAC，因此Director和RS需要知道彼此的MAC地址，而MAC地址又是通过arp协议来获取的，而arp协议是通过广播来实现的，而广播又不能穿过路由器，因此，Director和RS要在同一个路由器下，所以他们中间不能是路由器</p>
+<p>重点：对ARP的理解；免费ARP是？，自问自答，判断IP地址冲突；</p>
+<p>根据ARP协议的工作流程，修改ARP协议中的发送和接收选项；修改的是内核参数</p>
+<p>配置在回环网卡上，lo，网络地址稳定，不影响其他网卡</p>
+</blockquote>
+<h4 id="LVS-DR模型的数据流程图："><a href="#LVS-DR模型的数据流程图：" class="headerlink" title="LVS-DR模型的数据流程图："></a>LVS-DR模型的数据流程图：</h4><blockquote>
+<p><strong>注意：Web服务器网关要指向防火墙（路由器），因为响应报文不需要经过LVS，而是Web服务器自己发往客户端</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>注意：图中的防火墙提供了DNAT功能，把目标地址为172.30.0.200的请求都转发到了10.0.0.200上</strong></p>
+</blockquote>
+<blockquote>
+<p>注意：图中我认为客户端不应该之间知道内网LVS的地址，因此使用了防火墙的DNAT，对于LVS来说，目标IP是没变过的，一致是VIP</p>
+</blockquote>
+<blockquote>
+<p>注意：因为LVS-DR要让LVS和多台Web服务器使用一个相同的VIP，所以涉及地址冲突问题，但是可以通过修改所有Web服务器上的内核arp参数来解决这一问题，这样可以实现在这个局域网中，所有主机都认为拥有VIP地址的主机是LVS，因此防火墙会把报文先发送给LVS</p>
+</blockquote>
+<blockquote>
+<p>注意：因为VIP是绑定在回环网卡lo上的，而lo网卡没有MAC地址，因此其实是使用了每个主机的其他网卡进行信息传输的，所以在报文中的MAC地址都是本机的其他网卡的</p>
+</blockquote>
+<p>图中IP地址和MAC的对应关系</p>
+<table>
+<thead>
+<tr>
+<th align="center">网卡IP</th>
+<th align="center">MAC地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">172.30.0.100</td>
+<td align="center">5a</td>
+</tr>
+<tr>
+<td align="center">172.30.0.200</td>
+<td align="center">5b</td>
+</tr>
+<tr>
+<td align="center">10.0.0.100</td>
+<td align="center">5c</td>
+</tr>
+<tr>
+<td align="center">10.0.0.200</td>
+<td align="center">5d</td>
+</tr>
+<tr>
+<td align="center">10.0.0.130</td>
+<td align="center">5e</td>
+</tr>
+<tr>
+<td align="center">10.0.0.140</td>
+<td align="center">5f</td>
+</tr>
+</tbody></table>
+<p>请求报文的数据流：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105231944974.png" alt="image-20201105231944974"></p>
+<p>响应报文的数据流：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201106082943359.png" alt="image-20201106082943359"></p>
+<h4 id="LVS-TUN：为了跨网段通信"><a href="#LVS-TUN：为了跨网段通信" class="headerlink" title="LVS-TUN：为了跨网段通信"></a>LVS-TUN：为了跨网段通信</h4><p>Tunnel</p>
+<p>转发方式：Director不修改请求报文的IP首部（源IP为CIP，目标IP为VIP），而是在原IP报文之外再封装一个IP首部（源IP是DIP，目标IP是RIP）后，将报文发往由调度算法选出的目标RS；RS在发送响应报文时，将直接把报文发送给路由器，路由器再把报文发送回客户端，因此tun模式的响应报文也不经过Director</p>
+<p>特点：</p>
+<blockquote>
+<p>1.RIP和DIP可以不处于同一个物理网络中，RS的网关一般不能指向DIP，而是指向路由器。因此RS和Director是可以跨互联网的，DIP，RIP，VIP都可以是公网IP</p>
+<p>2.RS的tun接口上需要配置VIP地址，以便于接收Director转发过来的数据包，以及作为响应的报文源IP</p>
+<p>3.Director转发给RS时需要借助隧道，隧道外层的IP头部的源IP是DIP，目标IP是RIP，而RS响应给客户端的IP头是根据隧道内层的IP头分析得到的，源IP是VIP，目标IP是CIP</p>
+<p>4.请求报文要经由Director，但响应不经由Director，响应由RS自己完成</p>
+<p>5.不支持端口映射</p>
+<p>6.RS的操作系统必须支持隧道功能</p>
+<p>7.使用的很少，因为在广域网模式下使用代理服务比如nginx和DNS更多</p>
+</blockquote>
+<h4 id="LVS-FULLNAT模式："><a href="#LVS-FULLNAT模式：" class="headerlink" title="LVS-FULLNAT模式："></a>LVS-FULLNAT模式：</h4><p>转发原理：通过同时修改请求报文的源IP地址和目标IP地址进行转发</p>
+<p>特点：</p>
+<blockquote>
+<p>1.请求和响应报文都经由Director</p>
+<p>2.支持端口映射</p>
+<p>3.VIP是公网地址，RIP和DIP是私网地址，且通常不在同一个IP网络中，因此RIP的网关不指向DIP</p>
+<p>4.相对NAT模式，可以更好地实现RS间跨VLAN通讯</p>
+<p>5.这个模式Kernel默认不支持</p>
+</blockquote>
+<h4 id="LVS工作模式总结和比较"><a href="#LVS工作模式总结和比较" class="headerlink" title="LVS工作模式总结和比较"></a>LVS工作模式总结和比较</h4><table>
+<thead>
+<tr>
+<th>对比种类</th>
+<th>NAT</th>
+<th>TUN</th>
+<th>DR</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RS的操作系统要求</td>
+<td>任意操作系统</td>
+<td>支持隧道</td>
+<td>支持禁止arp广播和接收的系统</td>
+</tr>
+<tr>
+<td>RS所处的网络类型</td>
+<td>私网</td>
+<td>公网/私网</td>
+<td>私网，而且必须与调度器在同一个路由器中</td>
+</tr>
+<tr>
+<td>支持的RS数量</td>
+<td>10~20</td>
+<td>100+</td>
+<td>100+</td>
+</tr>
+<tr>
+<td>RS的网关配置</td>
+<td>需要指向调度器</td>
+<td>指向自身的路由器</td>
+<td>指向自身的路由器</td>
+</tr>
+<tr>
+<td>优点</td>
+<td>可以进行端口转换</td>
+<td>可以跨WAN</td>
+<td>性能最好</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>性能差</td>
+<td>系统需要支持隧道</td>
+<td>不可以跨网段</td>
+</tr>
+</tbody></table>
+<h3 id="2-LVS调试算法"><a href="#2-LVS调试算法" class="headerlink" title="2 LVS调试算法"></a>2 LVS调试算法</h3><p>Ipvs scheduler：根据其调度时是否考虑各RS当前的负载状态</p>
+<p>根据其调度时是否考虑RS当前负载状态分为静态和动态算法</p>
+<h4 id="1-静态算法"><a href="#1-静态算法" class="headerlink" title="1 静态算法"></a>1 静态算法</h4><ul>
+<li>RR：roundrobin，轮询，使用较多</li>
+<li>WRR：Weighted RR，加权轮询，使用较多</li>
+<li>SH：Source Hashing，源地址哈希，实现session sticky，会话绑定</li>
+<li>DH：Destination Hashing，目标地址哈希,典型使用场景是正向代理缓存场景中的负载均衡，比如Web缓存</li>
+</ul>
+<h4 id="2-动态算法"><a href="#2-动态算法" class="headerlink" title="2 动态算法"></a>2 动态算法</h4><p>根据后端RS的负载状态进行调度</p>
+<p>活动连接：建立连接并且有数据交互</p>
+<ul>
+<li>LC：least connections 最短连接算法，适用于长连接</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Overhead&#x3D;activeConnections*256+inactiveConnections</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>WLC：WeightedLC，带权重的最短连接算法，默认调度方法，较常用</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Overhead&#x3D;(activeConnections*256+inactiveConnections)&#x2F;weight</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>SED：Shortest Expection Delay，初始连接高权重优先，只检查活动连接，而不考虑非活动连接</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Overhead&#x3D;(activeConnections+1)*256&#x2F;weight</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>NQ：Never Queue，第一轮均匀分配，后续使用SED</li>
+<li>LBLC：Locallity-Based LC，动态的DH算法</li>
+<li>LBLCR：LBLC with Replication，带复制功能的LBLC，解决LBLC负载不均衡的问题</li>
+<li>内核版本4.15之后新增调度算法：FO和OVF</li>
+</ul>
+<h1 id="3-LVS相关软件"><a href="#3-LVS相关软件" class="headerlink" title="3 LVS相关软件"></a>3 LVS相关软件</h1><h2 id="1-ipvsadm"><a href="#1-ipvsadm" class="headerlink" title="1 ipvsadm"></a>1 ipvsadm</h2><p>程序包：ipvsadm</p>
+<p>主程序：/usr/sbin/ipvsadm</p>
+<p>规则保存程序：/usr/sbin/ipvsadm-save</p>
+<p>规则加载工具：/usr/sbin/ipvsadm-restore</p>
+<p>配置文件：/etc/sysconfig/ipvsadm-config</p>
+<p>调度规则文件：/etc/sysconfig/ipvsadm</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">yum -y install ipvsadm</span><br><span class="line">[root@node_7 ~]$rpm -ql ipvsadm</span><br><span class="line">&#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm-config</span><br><span class="line">&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;ipvsadm.service</span><br><span class="line">&#x2F;usr&#x2F;sbin&#x2F;ipvsadm</span><br><span class="line">&#x2F;usr&#x2F;sbin&#x2F;ipvsadm-restore</span><br><span class="line">&#x2F;usr&#x2F;sbin&#x2F;ipvsadm-save</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;doc&#x2F;ipvsadm-1.27</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;doc&#x2F;ipvsadm-1.27&#x2F;README</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;man&#x2F;man8&#x2F;ipvsadm-restore.8.gz</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;man&#x2F;man8&#x2F;ipvsadm-save.8.gz</span><br><span class="line">&#x2F;usr&#x2F;share&#x2F;man&#x2F;man8&#x2F;ipvsadm.8.gz</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="2-ipvsadm-使用"><a href="#2-ipvsadm-使用" class="headerlink" title="2 ipvsadm 使用"></a>2 ipvsadm 使用</h2><p>ipvsadm与iptables很像，他们的服务开启都是加载规则，所以不需要开服务，只需要写规则，他们都是对内核功能的调用</p>
+<p>核心功能：</p>
+<ul>
+<li>集群的管理：增加、删除、修改</li>
+<li>集群中业务服务器的管理：增加、删除、修改</li>
+<li>查看：<code>ipvsadm -Ln</code></li>
+</ul>
+<h4 id="创建一个完整的集群的步骤："><a href="#创建一个完整的集群的步骤：" class="headerlink" title="创建一个完整的集群的步骤："></a>创建一个完整的集群的步骤：</h4><p>分两步：</p>
+<p>第一步：创建集群</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A -t VIP:port -s 调度算法</span><br><span class="line">-A：--add-service add virtual service with options 表示添加虚拟服务器</span><br><span class="line">-t：--tcp-service service-address is host[:port]  添加tcp协议的服务器IP和端口</span><br><span class="line">-s：scheduler one of rr|wrr|lc|wlc|lblc|lblcr|dh|sh|sed|nq,the default scheduler 	is wlc.</span><br></pre></td></tr></table></figure>
+
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A -t 172.30.0.200:80 -s rr</span><br></pre></td></tr></table></figure>
+
+<p>第二步：添加集群中的服务器</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -a -t VIP:port -r RS的IP:RS的端口 -工作模式</span><br><span class="line">-a：--add-server add real server with options 表示添加真实的业务服务器</span><br><span class="line">-t：添加tcp协议的服务器的IP和端口</span><br><span class="line">工作模式：</span><br><span class="line">-m：masquerading (NAT) NAT模式</span><br><span class="line">-g：gatewaying (direct routing) (default) DR模式</span><br><span class="line">-i：ipip encapsulation (tunneling) TUN模式</span><br></pre></td></tr></table></figure>
+
+<p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -a -t 172.30.0.200:80 -r 10.0.0.7:80 -m</span><br><span class="line">ipvsadm -a -t 172.30.0.200:80 -r 10.0.0.14:80 -m</span><br></pre></td></tr></table></figure>
+
+<h4 id="集群的管理操作："><a href="#集群的管理操作：" class="headerlink" title="集群的管理操作："></a>集群的管理操作：</h4><p>增加、修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]]</span><br><span class="line">-A：增加虚拟服务</span><br><span class="line">-E：修改虚拟服务</span><br><span class="line">-t：使用tcp协议  -u：使用udp  -f：firewall Mark，防火墙标记，是一个数字</span><br><span class="line">-s：使用的调度算法</span><br><span class="line">-p：持久连接的保存时间，-p 后面不跟时间就是代表360秒</span><br></pre></td></tr></table></figure>
+
+<p>删除：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -D -t|u|f service-address</span><br></pre></td></tr></table></figure>
+
+<h4 id="集群中的RS的增、删、改："><a href="#集群中的RS的增、删、改：" class="headerlink" title="集群中的RS的增、删、改："></a>集群中的RS的增、删、改：</h4><p>增、改：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -a|e -t|u|f service-address -r server-address [-g|i|m] [-w weight]</span><br><span class="line">-a：增加RS服务器</span><br><span class="line">-e：修改RS服务器</span><br><span class="line">-t|u|f：tcp,udp,firewall mark</span><br><span class="line">-r：real server 的IP和Port</span><br><span class="line">-g：DR模式，默认模式</span><br><span class="line">-i：TUN模式</span><br><span class="line">-m：NAT模式</span><br><span class="line">-w：权重</span><br></pre></td></tr></table></figure>
+
+<p>删除：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -d -t|u|f service-address -r server-address</span><br></pre></td></tr></table></figure>
+
+<h4 id="清空集群命令："><a href="#清空集群命令：" class="headerlink" title="清空集群命令："></a>清空集群命令：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -C</span><br></pre></td></tr></table></figure>
+
+<h4 id="清空计数器："><a href="#清空计数器：" class="headerlink" title="清空计数器："></a>清空计数器：</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -Z [-t|u|f service-address]</span><br></pre></td></tr></table></figure>
+
+<h4 id="保存规则：建议保存到-etc-sysconfig-ipvsadm"><a href="#保存规则：建议保存到-etc-sysconfig-ipvsadm" class="headerlink" title="保存规则：建议保存到/etc/sysconfig/ipvsadm"></a>保存规则：建议保存到/etc/sysconfig/ipvsadm</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm-save &gt; /etc/sysconfig/ipvsadm</span><br><span class="line">或者</span><br><span class="line">ipvsadm -S &gt; /etc/sysconfig/ipvsadm</span><br><span class="line">或者</span><br><span class="line">systemctl stop ipvsadm.service <span class="comment">#这个service文件中调用的命令有保存</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="载入规则：会自动加载-etc-sysconfig-ipvsadm"><a href="#载入规则：会自动加载-etc-sysconfig-ipvsadm" class="headerlink" title="载入规则：会自动加载/etc/sysconfig/ipvsadm"></a>载入规则：会自动加载/etc/sysconfig/ipvsadm</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm-restore &lt; /path/from/ipvsadm_file</span><br><span class="line">或者</span><br><span class="line">systemctl start ipvsadm.service <span class="comment">#会自动加载/etc/sysconfig/ipvsadm</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="防火墙标记"><a href="#防火墙标记" class="headerlink" title="防火墙标记"></a>防火墙标记</h4><p>FWM：FireWall Mark</p>
+<p>Mark target 可用于给特定的报文打标记，–set-mark value，其中value可以是十六进制数字</p>
+<p>工作原理：借助于防火墙标记来分类报文，而后基于标记定义集群服务，可以将多个不同的应用使用同一个集群服务进行调度</p>
+<p>实现方法：</p>
+<p>在Director主机打标记：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t mangle -A PREROUTING -d $&#123;VIP&#125; -p $&#123;protocol&#125; -m multiport --dport $&#123;port1&#125;,$&#123;port2&#125;,... -j MARK --set-mark NUMBER</span><br></pre></td></tr></table></figure>
+
+<p>之后在ipvsadm中可以直接利用这个标记来标记集群</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A -f NUMBER [options]</span><br></pre></td></tr></table></figure>
+
+<p>例子：</p>
+<h4 id="LVS持久连接"><a href="#LVS持久连接" class="headerlink" title="LVS持久连接"></a>LVS持久连接</h4><p>session绑定：对共享同一组RS的多个集群服务，需要统一进行绑定，lvs sh算法无法实现</p>
+<p>持久连接（lvs persistence）模板：实现无论使用任何调度算法，在一段时间内（默认360s），能够实现将来自同一个地址的请求始终发往同一个RS</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -A|E -t|u|f service-address [-s scheduler] [-p [timeout]]</span><br><span class="line">使用-p选项就代表了持久连接，默认是360秒</span><br></pre></td></tr></table></figure>
+
+<p>持久连接的实现方法：</p>
+<ul>
+<li>按照端口，PPC，每端口持久，每个端口定义为一个集群服务，每个集群服务单独调度</li>
+<li>按照防火墙标记，PFWMC，每防火墙标记持久，基于防火墙标记定义集群服务，可以实现将多个端口上的应用同意调度，即port Affinity</li>
+</ul>
+<p>例子：</p>
+<h2 id="3-LVS的操作实例"><a href="#3-LVS的操作实例" class="headerlink" title="3 LVS的操作实例"></a>3 LVS的操作实例</h2><h3 id="1-NAT模式的操作"><a href="#1-NAT模式的操作" class="headerlink" title="1 NAT模式的操作"></a>1 NAT模式的操作</h3><p>环境说明：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105153045726.png" alt="image-20201105153045726"></p>
+<p>操作步骤</p>
+<h4 id="第一步：环境配置"><a href="#第一步：环境配置" class="headerlink" title="第一步：环境配置"></a>第一步：环境配置</h4><p>1.准备两个网段，</p>
+<p>2.配置IP地址</p>
+<p>3.这个图里画了防火墙，但是其实防火墙和LVS是一台主机</p>
+<p>配置192段主机的网关</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">先把原来的指向0.0.0.0的默认路由删掉</span><br><span class="line">ip route del default dev eth0 </span><br><span class="line">然后把默认路由指向防火墙一侧</span><br><span class="line">ip route add default dev eth0 via 172.30.0.200</span><br></pre></td></tr></table></figure>
+
+<p>配置10段主机的网关，这个网关是指向Director的，因为响应报文要先发给Director进行处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">先把原来的指向0.0.0.0的默认路由删掉</span><br><span class="line">ip route del default dev eth0 </span><br><span class="line">然后把默认路由指向防火墙一侧</span><br><span class="line">ip route add default dev eth0 via 10.0.0.100</span><br></pre></td></tr></table></figure>
+
+<p>4.注意一点，防火墙两边的主机的网关都要指向防火墙，而且防火墙上不要配置Iptables规则，尤其是nat表的规则，因为LVS的ipvsadm是作用在INPUT表的</p>
+<p>5.防火墙要开启路由转发功能 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;net.ipv4.ip_forward &#x3D; 1&quot; &gt;&gt; &#x2F;etc&#x2F;sysctl.conf</span><br><span class="line">sysctl -p;让sysctl.conf的内容生效</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="第二步：LVS的操作"><a href="#第二步：LVS的操作" class="headerlink" title="第二步：LVS的操作"></a>第二步：LVS的操作</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@node_7 ~]$yum install ipvsadm</span><br><span class="line">[root@node_7 ~]$ipvsadm -A -t 172.30.0.200:80 -s rr</span><br><span class="line">[root@node_7 ~]$ipvsadm -Ln</span><br><span class="line">IP Virtual Server version 1.2.1 (size&#x3D;4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  172.30.0.200:80 rr</span><br><span class="line">[root@node_7 ~]$ipvsadm -a -t 172.30.0.200:80 -r 10.0.0.7:80 -m</span><br><span class="line">[root@node_7 ~]$ipvsadm -a -t 172.30.0.200:80 -r 10.0.0.14:80 -m</span><br><span class="line">[root@node_7 ~]$ipvsadm -Ln</span><br><span class="line">IP Virtual Server version 1.2.1 (size&#x3D;4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  172.30.0.200:80 rr</span><br><span class="line">  -&gt; 10.0.0.7:80                  Masq    1      0          0         </span><br><span class="line">  -&gt; 10.0.0.14:80                 Masq    1      0          0 </span><br></pre></td></tr></table></figure>
+
+<h4 id="第三步：在外网进行访问"><a href="#第三步：在外网进行访问" class="headerlink" title="第三步：在外网进行访问"></a>第三步：在外网进行访问</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@node_7 ~]$curl 172.30.0.200</span><br><span class="line">Hello,my friends!,this is 14</span><br><span class="line">[root@node_7 ~]$curl 172.30.0.200</span><br><span class="line">Hello,my friends! this is 7</span><br><span class="line">[root@node_7 ~]$curl 172.30.0.200</span><br><span class="line">Hello,my friends!,this is 14</span><br><span class="line">[root@node_7 ~]$curl 172.30.0.200</span><br><span class="line">Hello,my friends! this is 7</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>测试成功！</p>
+<p>保存规则：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm-save &gt; &#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm</span><br></pre></td></tr></table></figure>
+
+<p>清除规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -C</span><br></pre></td></tr></table></figure>
+
+<p>重新导入规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm-restore &lt; &#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm</span><br></pre></td></tr></table></figure>
+
+<p>设置开机自动导入规则</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable ipvsadm.service</span><br><span class="line">前提是保存的规则文件确实是&#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm才行，为什么，因为ipvsadm.service文件里面是：</span><br><span class="line">  7 ExecStart&#x3D;&#x2F;bin&#x2F;bash -c &quot;exec &#x2F;sbin&#x2F;ipvsadm-restore &lt; &#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm&quot;</span><br><span class="line">  8 ExecStop&#x3D;&#x2F;bin&#x2F;bash -c &quot;exec &#x2F;sbin&#x2F;ipvsadm-save -n &gt; &#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm&quot;</span><br><span class="line">  9 ExecStop&#x3D;&#x2F;sbin&#x2F;ipvsadm -C</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-DR模式的操作"><a href="#2-DR模式的操作" class="headerlink" title="2.DR模式的操作"></a>2.DR模式的操作</h3><h4 id="杂谈："><a href="#杂谈：" class="headerlink" title="杂谈："></a>杂谈：</h4><p>单网段和多网段</p>
+<p>LVS也需要配置一个路由</p>
+<p>网络环境的配置尽量按照一个方向配置</p>
+<p>修改内核参数需要修改ALL和lo网卡</p>
+<p>如何永久添加一个网卡上的两个IP：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection modify eth0 +ipv4.address 172.16.0.200&#x2F;24 ifname eth0</span><br><span class="line">其实就是在ifcfg-eth0的配置文件中添加了ipaddr1&#x3D;172.16.0.200 prefix1&#x3D;24 这样的行</span><br></pre></td></tr></table></figure>
+
+<h4 id="LVS-DR单网段"><a href="#LVS-DR单网段" class="headerlink" title="LVS-DR单网段"></a>LVS-DR单网段</h4><p>DR模型中LVS和各个RS主机上都需要配置VIP，但是他们不是同一台主机，因此会出现一个VIP地址有三个MAC地址的问题，也就是地址冲突问题，所以要解决这个问题，解决这个问题的方法大概有三种：</p>
+<p>1）在前端的路由器上做VIP地址和LVS服务器MAC的绑定</p>
+<p>2）在各个RS上使用arptables工具</p>
+<p>3）在各个RS上修改内核参数（arp的广播和接收），来限制arp响应和通告的级别</p>
+<p>方法一存在问题，那就是每当更换LVS服务器时，都需要修改路由器上的绑定关系，因此不推荐使用</p>
+<p>方法二的配置还需要学习，因此暂时不用，arptables的思路与iptables思路一样，只不过协议变了</p>
+<p>方法三好配置，因此推荐使用</p>
+<p>需要修改的内核参数：arp_ignore,arp_announce</p>
+<p><strong>注意：这两个参数都是有一个总的配置和每个网卡上的配置，因此修改的时候需要修改总的配置和需要配置VIP的网卡的配置</strong></p>
+<blockquote>
+<p> arp_ignore：限制响应级别</p>
+<ul>
+<li>0：默认值，表示可以使用本地任意接口上配置的任意地址进行响应</li>
+<li>1：仅在请求的目标IP配置在本地主机的接收请求报文的接口上时，才给予响应</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>arp_announce：限制通告级别</p>
+<ul>
+<li>0：默认值，把本机所有接口的所有信息向每个接口的网络进行通告</li>
+<li>1：尽量避免将接口信息向非直接连接的网络进行通告</li>
+<li>2：必须避免将接口信息向非本网络进行通告</li>
+</ul>
+</blockquote>
+<p>范例1：</p>
+<p>环境：</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105161821292.png" alt="image-20201105161821292"></p>
+<p>环境准备：5台主机，两个网段，注意网关的配置，每个主机的网关都要指向路由器，路由器要开启路由转发</p>
+<p><strong>注意：LVS服务器和两台RS服务器上，都要配置VIP，VIP都配置到lo网卡上</strong></p>
+<p>配置网络环境中最主要的命令：</p>
+<p>修改路由：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip route del default dev eth0</span><br><span class="line">ip route add default dev etho via 10.0.0.100</span><br></pre></td></tr></table></figure>
+
+<p>查看路由</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">route -n</span><br><span class="line">或者</span><br><span class="line">ip route</span><br></pre></td></tr></table></figure>
+
+<p>添加IP地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip address add 10.0.0.200&#x2F;32 dev lo</span><br></pre></td></tr></table></figure>
+
+
+
+<p>步骤：</p>
+<p>1.两台RS的配置，即arp参数的修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F;all&#x2F;arp_ignore </span><br><span class="line">➜  ~ echo 2 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F;all&#x2F;arp_announce </span><br><span class="line">➜  ~ echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F;lo&#x2F;arp_ignore </span><br><span class="line">➜  ~ echo 2 &gt; &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F;lo&#x2F;arp_announce</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2.LVS服务器的配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ ipvsadm -A -t 10.0.0.200:80 -s wrr</span><br><span class="line">➜  ~ ipvsadm -a -t 10.0.0.200:80 -r 10.0.0.7:80 -g </span><br><span class="line">➜  ~ ipvsadm -a -t 10.0.0.200:80 -r 10.0.0.14:80 -g</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3.172网段的主机进行访问测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@node_7 ~]$curl 10.0.0.200</span><br><span class="line">Hello,my friends!,this is 14</span><br><span class="line">[root@node_7 ~]$curl 10.0.0.200</span><br><span class="line">Hello,my friends!,this is 7</span><br><span class="line">[root@node_7 ~]$curl 10.0.0.200</span><br><span class="line">Hello,my friends!,this is 14</span><br><span class="line">[root@node_7 ~]$curl 10.0.0.200</span><br><span class="line">Hello,my friends!,this is 7</span><br></pre></td></tr></table></figure>
+
+<p>测试成功</p>
+<p>想要对LVS-DR模式的修改MAC地址进行了解，那么就抓包查看</p>
+<p>首先开启抓包软件，然后监听NAT网卡，也就是VMNET8，然后在172.30.0.100上curl；</p>
+<p>注意：因为抓的是VMNET8网段，所以看不到172主机与路由器之间的通讯，下面我们看到的通讯已经经过了路由器的转发了，也就是说，172.30.0.100这个IP所带的MAC其实已经是路由器的MAC了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl 10.0.0.200</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105174819989.png" alt="image-20201105174819989"></p>
+<p>下面对这个报文进行分析</p>
+<blockquote>
+<p>1.请求报文： SRC 172.30.0.100 SRC-MAC 8a DEST 10.0.0.200 DEST-MAC 0d<br>2.请求报文： SRC 172.30.0.100 SRC-MAC 0d DEST 10.0.0.200 DEST-MAC a5<br>3.响应报文： SRC 10.0.0.200 SRC-MAC a5 DEST 172.30.0.100 DEST-MAC 8a</p>
+</blockquote>
+<p>通过对报文的分析，可以看到：</p>
+<p>首先，172主机向10.0.0.200的IP地址发起请求，这个时候的10.0.0.200的MAC是LVS主机</p>
+<p>然后，LVS主机根据调度算法，向一个MAC地址是a5（IP是10.0.0.14）的主机转发了这个报文，可以注意到，此时的源IP地址和源MAC并没有改变，目标IP也没有改变，但是目标MAC改变了</p>
+<p>最后，10.0.0.14主机向172.30.0.100主机发出响应报文，此时可以看到，源IP地址是10.0.0.200，源MAC是10.0.0.14的MAC，目标IP是172.30.0.100，目标MAC是路由器的MAC</p>
+<h4 id="LVS-DR模式多网段"><a href="#LVS-DR模式多网段" class="headerlink" title="LVS-DR模式多网段"></a>LVS-DR模式多网段</h4><p>环境搭建</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20201105191226209.png" alt="image-20201105191226209"></p>
+<p>这个实验与上一个实验的区别就是对VIP是一个与RS服务器不在同一个网段的IP，因此在路由器上需要增加一个192.168.0.0/24的地址；还有一个区别，那就是LVS服务器的网关，这个网关其实是没用的，因为它接收到报文后，通过修改MAC的方式调度到RS服务器上了，它不需要跨网段通信，但是不设置这个网关还真不行，随便设置一个就行</p>
+<p>在这里还碰到了问题，那就是通过命令临时添加的路由和IP会自动消失（虚拟机环境），因此我写到了配置文件中，给一个网卡上永久保存两个IP的命令是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection modify eth0 +ipv4.address 192.168.0.200&#x2F;24 ifname eth0</span><br></pre></td></tr></table></figure>
+
+<p>这个命令其实是修改了ifcfg-eth0的配置文件，所以也需要通过命令重新加载网卡配置文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nmcli connection reload</span><br><span class="line">nmcli connection up eth0</span><br></pre></td></tr></table></figure>
+
+<p>查看ifcfg-eth0文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> 1 DEVICE&#x3D;eth0                                                                  </span><br><span class="line"> 2 NAME&#x3D;eth0</span><br><span class="line"> 3 ONBOOT&#x3D;yes</span><br><span class="line"> 4 BOOTPROTO&#x3D;static</span><br><span class="line"> 5 IPADDR&#x3D;10.0.0.100</span><br><span class="line"> 6 NETMASK&#x3D;255.255.255.0</span><br><span class="line"> 7 GATEWAY&#x3D;10.0.0.1</span><br><span class="line"> 8 DNS1&#x3D;180.76.76.76</span><br><span class="line"> 9 DNS2&#x3D;223.6.6.6</span><br><span class="line">10 TYPE&#x3D;Ethernet</span><br><span class="line">11 PROXY_METHOD&#x3D;none</span><br><span class="line">12 BROWSER_ONLY&#x3D;no</span><br><span class="line">13 PREFIX&#x3D;24</span><br><span class="line">14 IPADDR1&#x3D;192.168.0.200</span><br><span class="line">15 PREFIX1&#x3D;24</span><br><span class="line">16 NETMASK1&#x3D;255.255.255.0</span><br><span class="line">17 DEFROUTE&#x3D;yes</span><br><span class="line">18 IPV4_FAILURE_FATAL&#x3D;no</span><br><span class="line">19 IPV6INIT&#x3D;no</span><br><span class="line">20 UUID&#x3D;5fb06bd0-0bb0-7ffb-45f1-d6edd65f3e03</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>脚本：</p>
+<p>自动配置LVS服务器、RS服务器，其实就是修改arp内核参数，配置VIP到lo网卡上</p>
+<h3 id="3-tunnel模式的操作"><a href="#3-tunnel模式的操作" class="headerlink" title="3.tunnel模式的操作"></a>3.tunnel模式的操作</h3><p>ip addr add xxxx dev tunl0</p>
+<p>ip link set tunl0 up</p>
+<p>防火墙标记</p>
+<p>使用mangle表的标记</p>
+<p>LVS的持久连接</p>
+<p>一段时间内让一个用户访问同一个业务服务器，这样可以保留session信息</p>
+<p>这个时间可以设置</p>
+<h2 id="4-LVS的高可用"><a href="#4-LVS的高可用" class="headerlink" title="4 LVS的高可用"></a>4 LVS的高可用</h2><p>使用keepalive实现LVS的高可用</p>
+<h3 id="LVS的两个痛点："><a href="#LVS的两个痛点：" class="headerlink" title="LVS的两个痛点："></a>LVS的两个痛点：</h3><p>高可用的解决方法：</p>
+<p>Keepalive，使用一个虚拟IP，谁工作，VIP就是谁的</p>
+<p>对业务服务器状态无法感知的解决方法：</p>
+<p>KeepAlive，定期检查业务服务器的状态</p>
+<p>要求：LVS-DR模型操作</p>
+<p>在实验中加入LVS+</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/18/DNS%E6%9C%8D%E5%8A%A1%E5%92%8CBIND%E8%BD%AF%E4%BB%B6/" rel="prev" title="DNS服务和BIND软件">
+      <i class="fa fa-chevron-left"></i> DNS服务和BIND软件
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/18/Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E7%AE%A1%E7%90%86/" rel="next" title="Linux启动和内核管理">
+      Linux启动和内核管理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          المحتويات
+        </li>
+        <li class="sidebar-nav-overview">
+          عام
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux-Virtual-Server"><span class="nav-number">1.</span> <span class="nav-text">Linux Virtual Server</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AE%B9%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">内容：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E9%9B%86%E7%BE%A4%E5%92%8C%E5%88%86%E5%B8%83%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">1.集群和分布式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E9%9B%86%E7%BE%A4-Cluster"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 集群 Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 分布式系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-LB-Cluster-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E9%9B%86%E7%BE%A4"><span class="nav-number">2.3.</span> <span class="nav-text">1.6 LB Cluster 负载均衡集群</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-LVS"><span class="nav-number">3.</span> <span class="nav-text">2.LVS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS%E9%9B%86%E7%BE%A4%E4%B8%AD%E7%9A%84%E6%9C%AF%E8%AF%AD"><span class="nav-number">3.1.</span> <span class="nav-text">LVS集群中的术语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LVS%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E5%92%8C%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="nav-number">3.2.</span> <span class="nav-text">LVS工作模式和相关命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-LVS%E9%9B%86%E7%BE%A4%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.2.1.</span> <span class="nav-text">1 LVS集群的工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-NAT"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">LVS-NAT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-DR%EF%BC%9A%E6%9C%80%E4%B8%BB%E6%B5%81%E7%9A%84%E4%BD%BF%E7%94%A8%E6%A8%A1%E5%9E%8B%E3%80%81%E9%BB%98%E8%AE%A4%E7%9A%84%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">LVS-DR：最主流的使用模型、默认的模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-DR%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE%E6%B5%81%E7%A8%8B%E5%9B%BE%EF%BC%9A"><span class="nav-number">3.2.1.3.</span> <span class="nav-text">LVS-DR模型的数据流程图：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-TUN%EF%BC%9A%E4%B8%BA%E4%BA%86%E8%B7%A8%E7%BD%91%E6%AE%B5%E9%80%9A%E4%BF%A1"><span class="nav-number">3.2.1.4.</span> <span class="nav-text">LVS-TUN：为了跨网段通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-FULLNAT%E6%A8%A1%E5%BC%8F%EF%BC%9A"><span class="nav-number">3.2.1.5.</span> <span class="nav-text">LVS-FULLNAT模式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%80%BB%E7%BB%93%E5%92%8C%E6%AF%94%E8%BE%83"><span class="nav-number">3.2.1.6.</span> <span class="nav-text">LVS工作模式总结和比较</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-LVS%E8%B0%83%E8%AF%95%E7%AE%97%E6%B3%95"><span class="nav-number">3.2.2.</span> <span class="nav-text">2 LVS调试算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E9%9D%99%E6%80%81%E7%AE%97%E6%B3%95"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">1 静态算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%8A%A8%E6%80%81%E7%AE%97%E6%B3%95"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">2 动态算法</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-LVS%E7%9B%B8%E5%85%B3%E8%BD%AF%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">3 LVS相关软件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ipvsadm"><span class="nav-number">4.1.</span> <span class="nav-text">1 ipvsadm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ipvsadm-%E4%BD%BF%E7%94%A8"><span class="nav-number">4.2.</span> <span class="nav-text">2 ipvsadm 使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4%E7%9A%84%E9%9B%86%E7%BE%A4%E7%9A%84%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="nav-number">4.2.0.1.</span> <span class="nav-text">创建一个完整的集群的步骤：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E7%9A%84%E7%AE%A1%E7%90%86%E6%93%8D%E4%BD%9C%EF%BC%9A"><span class="nav-number">4.2.0.2.</span> <span class="nav-text">集群的管理操作：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E7%BE%A4%E4%B8%AD%E7%9A%84RS%E7%9A%84%E5%A2%9E%E3%80%81%E5%88%A0%E3%80%81%E6%94%B9%EF%BC%9A"><span class="nav-number">4.2.0.3.</span> <span class="nav-text">集群中的RS的增、删、改：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E9%9B%86%E7%BE%A4%E5%91%BD%E4%BB%A4%EF%BC%9A"><span class="nav-number">4.2.0.4.</span> <span class="nav-text">清空集群命令：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E8%AE%A1%E6%95%B0%E5%99%A8%EF%BC%9A"><span class="nav-number">4.2.0.5.</span> <span class="nav-text">清空计数器：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98%E8%A7%84%E5%88%99%EF%BC%9A%E5%BB%BA%E8%AE%AE%E4%BF%9D%E5%AD%98%E5%88%B0-etc-sysconfig-ipvsadm"><span class="nav-number">4.2.0.6.</span> <span class="nav-text">保存规则：建议保存到&#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%BD%E5%85%A5%E8%A7%84%E5%88%99%EF%BC%9A%E4%BC%9A%E8%87%AA%E5%8A%A8%E5%8A%A0%E8%BD%BD-etc-sysconfig-ipvsadm"><span class="nav-number">4.2.0.7.</span> <span class="nav-text">载入规则：会自动加载&#x2F;etc&#x2F;sysconfig&#x2F;ipvsadm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%B2%E7%81%AB%E5%A2%99%E6%A0%87%E8%AE%B0"><span class="nav-number">4.2.0.8.</span> <span class="nav-text">防火墙标记</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5"><span class="nav-number">4.2.0.9.</span> <span class="nav-text">LVS持久连接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-LVS%E7%9A%84%E6%93%8D%E4%BD%9C%E5%AE%9E%E4%BE%8B"><span class="nav-number">4.3.</span> <span class="nav-text">3 LVS的操作实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-NAT%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.3.1.</span> <span class="nav-text">1 NAT模式的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-number">4.3.1.1.</span> <span class="nav-text">第一步：环境配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9ALVS%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.3.1.2.</span> <span class="nav-text">第二步：LVS的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E5%9C%A8%E5%A4%96%E7%BD%91%E8%BF%9B%E8%A1%8C%E8%AE%BF%E9%97%AE"><span class="nav-number">4.3.1.3.</span> <span class="nav-text">第三步：在外网进行访问</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-DR%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.3.2.</span> <span class="nav-text">2.DR模式的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%82%E8%B0%88%EF%BC%9A"><span class="nav-number">4.3.2.1.</span> <span class="nav-text">杂谈：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-DR%E5%8D%95%E7%BD%91%E6%AE%B5"><span class="nav-number">4.3.2.2.</span> <span class="nav-text">LVS-DR单网段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LVS-DR%E6%A8%A1%E5%BC%8F%E5%A4%9A%E7%BD%91%E6%AE%B5"><span class="nav-number">4.3.2.3.</span> <span class="nav-text">LVS-DR模式多网段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-tunnel%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.3.3.</span> <span class="nav-text">3.tunnel模式的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-LVS%E7%9A%84%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">4.4.</span> <span class="nav-text">4 LVS的高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LVS%E7%9A%84%E4%B8%A4%E4%B8%AA%E7%97%9B%E7%82%B9%EF%BC%9A"><span class="nav-number">4.4.1.</span> <span class="nav-text">LVS的两个痛点：</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">huihui</p>
+  <div class="site-description" itemprop="description">学习和看笔记</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">المقالات</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">الوسوم</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">huihui</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
