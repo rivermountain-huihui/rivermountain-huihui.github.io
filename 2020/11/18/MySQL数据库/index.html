@@ -17,15 +17,15 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="MySQL是什么 关系型数据库管理软件–RDBMS  数据库是数据库，MySQL是管理数据库的软件 实体-联系模型E-R 实体Entity：客观存在并且可以相互区分的客观事物或抽象事件称为实体 属性：实体所具有的特征或性质 联系：联系是数据之间的关联集合，是客观存在的应用语义链 实体和属性之间的联系 实体和实体之间的联系       数据冗余和性能的矛盾关系，冗余越小，在查询数据的时候就会越消耗性">
+  <meta name="description" content="MySQL是什么">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MYSQL">
 <meta property="og:url" content="http://example.com/2020/11/18/MySQL%E6%95%B0%E6%8D%AE%E5%BA%93/index.html">
 <meta property="og:site_name" content="辉辉的数据库">
-<meta property="og:description" content="MySQL是什么 关系型数据库管理软件–RDBMS  数据库是数据库，MySQL是管理数据库的软件 实体-联系模型E-R 实体Entity：客观存在并且可以相互区分的客观事物或抽象事件称为实体 属性：实体所具有的特征或性质 联系：联系是数据之间的关联集合，是客观存在的应用语义链 实体和属性之间的联系 实体和实体之间的联系       数据冗余和性能的矛盾关系，冗余越小，在查询数据的时候就会越消耗性">
+<meta property="og:description" content="MySQL是什么">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="c:/Users/a/Desktop/dfff6efbab0d51a715a36f867daeacf8.png">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200925200135006.png">
@@ -38,7 +38,7 @@
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200929171429834.png">
 <meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200929173016961.png">
 <meta property="article:published_time" content="2020-11-18T00:48:10.000Z">
-<meta property="article:modified_time" content="2020-11-18T14:00:00.824Z">
+<meta property="article:modified_time" content="2020-11-19T00:46:10.859Z">
 <meta property="article:author" content="huihui">
 <meta property="article:tag" content="notes">
 <meta name="twitter:card" content="summary">
@@ -185,10 +185,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-11-18 08:48:10 / 修改时间：22:00:00" itemprop="dateCreated datePublished" datetime="2020-11-18T08:48:10+08:00">2020-11-18</time>
+              <time title="创建时间：2020-11-18 08:48:10" itemprop="dateCreated datePublished" datetime="2020-11-18T08:48:10+08:00">2020-11-18</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-19 08:46:10" itemprop="dateModified" datetime="2020-11-19T08:46:10+08:00">2020-11-19</time>
+              </span>
 
           
 
@@ -201,7 +207,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="MySQL是什么"><a href="#MySQL是什么" class="headerlink" title="MySQL是什么"></a>MySQL是什么</h2><ul>
+        <h2 id="MySQL是什么"><a href="#MySQL是什么" class="headerlink" title="MySQL是什么"></a>MySQL是什么</h2><a id="more"></a>
+
+<ul>
 <li><p>关系型数据库管理软件–RDBMS</p>
 <ul>
 <li>数据库是数据库，MySQL是管理数据库的软件</li>
@@ -2068,7 +2076,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">huihui</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div>
 
         
@@ -2094,7 +2102,7 @@
 <script src="/js/motion.js"></script>
 
 
-<script src="/js/schemes/muse.js"></script>
+<script src="/js/schemes/pisces.js"></script>
 
 
 <script src="/js/next-boot.js"></script>
@@ -2116,6 +2124,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   
