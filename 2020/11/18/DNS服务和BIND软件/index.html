@@ -1,34 +1,304 @@
-extends _partial/layout.pug
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="huihui"><meta name="copyright" content="huihui"><meta name="generator" content="Hexo 5.2.0"><meta name="theme" content="hexo-theme-yun"><title>DNS服务和BIND软件 | 辉辉的数据库</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-markdown-css@0.1.22/dist/yun/yun-markdown.min.css"><script src="//at.alicdn.com/t/font_1140697_ed8vp4atwoj.js" async></script><script src="https://cdn.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>document.addEventListener("DOMContentLoaded", () => {
+  [".post-card",".post-content img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+});
+</script><link rel="shortcut icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="alternate icon" href="/yun.ico"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="preload" href="/js/utils.js" as="script"><link rel="preload" href="/js/hexo-theme-yun.js" as="script"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script id="yun-config">
+    const Yun = window.Yun || {};
+    window.CONFIG = {"hostname":"example.com","root":"/","title":"云游君的小站","version":"1.3.0","mode":"auto","copycode":true,"anonymous_image":"https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/avatar/none.jpg","say":{"api":"https://v1.hitokoto.cn","hitokoto":true},"fireworks":{"colors":["102, 167, 221","62, 131, 225","33, 78, 194"]}};
+  </script><meta name="description" content="DNS服务和BIND软件2.DNS实现主服务器 3.DNS实现从服务器 4.DNS实现子域 5.DNS实现域名转发 6.DNS实现反向区域解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS服务和BIND软件">
+<meta property="og:url" content="http://example.com/2020/11/18/DNS%E6%9C%8D%E5%8A%A1%E5%92%8CBIND%E8%BD%AF%E4%BB%B6/index.html">
+<meta property="og:site_name" content="辉辉的数据库">
+<meta property="og:description" content="DNS服务和BIND软件2.DNS实现主服务器 3.DNS实现从服务器 4.DNS实现子域 5.DNS实现域名转发 6.DNS实现反向区域解析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200912170407556.png">
+<meta property="og:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200914212757775.png">
+<meta property="article:published_time" content="2020-11-18T00:48:10.000Z">
+<meta property="article:modified_time" content="2020-11-19T00:44:44.622Z">
+<meta property="article:author" content="huihui">
+<meta property="article:tag" content="notes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/a/AppData/Roaming/Typora/typora-user-images/image-20200912170407556.png"><script src="/js/ui/mode.js"></script></head><body><script defer src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script defer src="/js/ui/fireworks.js"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-list-ordered"></use></svg></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-passport-line"></use></svg></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="huihui"><img width="96" loading="lazy" src="/Yun.png" alt="huihui"></a><div class="site-author-name"><a href="/about/">huihui</a></div><a class="site-name" href="/about/site.html">辉辉的数据库</a><sub class="site-subtitle">我们要丈量大地！</sub><div class="site-desciption">笔记</div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-home-4-line"></use></svg></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-archive-line"></use></svg></span><span class="site-state-item-count">12</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-folder-2-line"></use></svg></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-price-tag-3-line"></use></svg></span><span class="site-state-item-count">1</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-settings-line"></use></svg></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-rss-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://qm.qq.com/cgi-bin/qm/qr?k=epvxdq1sknJe9JMj6J1LsBw4a6cI_2ln&amp;jump_from=webapi" title="QQ 群 389401003" target="_blank" style="color:#12B7F5"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-qq-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/YunYouJun" title="GitHub" target="_blank" style="color:#6e5494"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-github-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://weibo.com/jizhideyunyoujun" title="微博" target="_blank" style="color:#E6162D"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-weibo-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://www.douban.com/people/yunyoujun/" title="豆瓣" target="_blank" style="color:#007722"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-douban-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://music.163.com/#/user/home?id=247102977" title="网易云音乐" target="_blank" style="color:#C20C0C"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-netease-cloud-music-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://www.zhihu.com/people/yunyoujun/" title="知乎" target="_blank" style="color:#0084FF"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-zhihu-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://space.bilibili.com/1579790" title="哔哩哔哩" target="_blank" style="color:#FF8EB3"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-bilibili-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://twitter.com/YunYouJun" title="Twitter" target="_blank" style="color:#1da1f2"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-twitter-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://t.me/elpsycn" title="Telegram Channel" target="_blank" style="color:#0088CC"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-telegram-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:me@yunyoujun.cn" title="E-Mail" target="_blank" style="color:#8E71C1"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-mail-line"></use></svg></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://travellings.now.sh/" title="Travelling" target="_blank" style="color:var(--hty-text-color)"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-send-plane-2-line"></use></svg></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-genderless-line"></use></svg></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-contrast-2-line"></use></svg></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#DNS%E6%9C%8D%E5%8A%A1%E5%92%8CBIND%E8%BD%AF%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">DNS服务和BIND软件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%90%8D%E5%AD%97%E8%A7%A3%E6%9E%90%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">1.名字解析介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-DNS%E6%9C%8D%E5%8A%A1%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">1.2.</span> <span class="toc-text">2.DNS服务工作原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%9E%E7%8E%B0%E4%B8%BB%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.3.</span> <span class="toc-text">3.实现主服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%AE%9E%E7%8E%B0%E5%8F%8D%E5%90%91%E8%A7%A3%E6%9E%90"><span class="toc-number">1.4.</span> <span class="toc-text">4.实现反向解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%AE%9E%E7%8E%B0%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">1.5.</span> <span class="toc-text">5.实现从服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%AE%9E%E7%8E%B0%E5%AD%90%E5%9F%9F"><span class="toc-number">1.6.</span> <span class="toc-text">6.实现子域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E5%AE%9E%E7%8E%B0%E8%BD%AC%E5%8F%91"><span class="toc-number">1.7.</span> <span class="toc-text">7.实现转发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-%E5%AE%9E%E7%8E%B0%E6%99%BA%E8%83%BDDNS"><span class="toc-number">1.8.</span> <span class="toc-text">8.实现智能DNS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-%E7%BB%BC%E5%90%88%E5%AE%9E%E9%AA%8C%EF%BC%9ADNS%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="toc-number">1.9.</span> <span class="toc-text">9.综合实验：DNS的使用</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="post-block" itemscope itemtype="https://schema.org/Article"><link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/DNS%E6%9C%8D%E5%8A%A1%E5%92%8CBIND%E8%BD%AF%E4%BB%B6/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="huihui"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="辉辉的数据库"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">DNS服务和BIND软件</h1><div class="post-meta"><div class="post-time" style="display:inline-block"><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-calendar-line"></use></svg></span> <time title="创建时间：2020-11-18 08:48:10" itemprop="dateCreated datePublished" datetime="2020-11-18T08:48:10+08:00">2020-11-18</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-calendar-2-line"></use></svg></span> <time title="修改时间：2020-11-19 08:44:44" itemprop="dateModified" datetime="2020-11-19T08:44:44+08:00">2020-11-19</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body" style="--smc-primary:#0078E7;"><h2 id="DNS服务和BIND软件"><a href="#DNS服务和BIND软件" class="headerlink" title="DNS服务和BIND软件"></a>DNS服务和BIND软件</h2><p>2.DNS实现主服务器</p>
+<p>3.DNS实现从服务器</p>
+<p>4.DNS实现子域</p>
+<p>5.DNS实现域名转发</p>
+<p>6.DNS实现反向区域解析</p>
+<a id="more"></a>
 
-block content
-  - var post = page
-  #post
-    article.post-block(itemscope, itemtype='https://schema.org/Article')
-      include _partial/post/post-schema.pug
-      if post.type
-        - post_type = getPropertyByType(post.type)
-      header.post-header
-        h1.post-title(itemprop='name headline', style=post.type ? `color: ${post_type.color}` : '')
-          if post.type
-            +icon(post_type.icon)
-          | #{post.title}
+<h3 id="1-名字解析介绍"><a href="#1-名字解析介绍" class="headerlink" title="1.名字解析介绍"></a>1.名字解析介绍</h3><p>TCP/IP协议–&gt;IP地址是访问的开始–&gt;IP地址难记–&gt;用一种好记的名字代替IP，域名出现</p>
+<p>格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">192.168.1.222  www.dawang.org</span><br><span class="line">203.23.44.222  www.xiaowang.org</span><br></pre></td></tr></table></figure>
 
-          if theme.post_edit.enable
-            include _partial/post/post-edit.pug
+<p>DNS domain name system 域名系统，应用层协议，是互联网的一项服务。</p>
+<p>C/S架构</p>
+<p>53/udp：同步和查询</p>
+<p>53/tcp：同步</p>
+<p>DNS级别：</p>
+<ul>
+<li>根域</li>
+<li>一级域名<ul>
+<li>三类：组织域、国家域、反向域</li>
+</ul>
+</li>
+<li>二级域名：xxxxxx.com</li>
+<li>三级域名：aaa.xxxx.com</li>
+<li>最多127级域名</li>
+</ul>
+<h3 id="2-DNS服务工作原理"><a href="#2-DNS服务工作原理" class="headerlink" title="2.DNS服务工作原理"></a>2.DNS服务工作原理</h3><p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200912170407556.png" alt="image-20200912170407556"></p>
+<p>DNS的查询类型：</p>
+<ul>
+<li>递归查询：一般客户端和本地DNS服务端之间属于递归查询，即当客户机向DNS服务器发出请求后，若DNS服务器本身不能解析，则会向另外的DNS服务器发出查询请求，得到最终的肯定或者否定的结构后转交给客户机。此查询的源和目标保持不变，为了查询结果只需要发起一次查询。</li>
+<li>迭代查询：一般情况下本地的DNS服务器向其他DNS服务器的查询属于迭代查询，如：若对方不能返回权威的结果，则它会向下一个DNS服务器再次发起查询，直到返回查询的结果为止。此查询的源不变，但查询的目标不断变化，为查询结果一般需要发起多次查询。</li>
+</ul>
+<p>小工具：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">whois xxxxx.com</span><br><span class="line">可以查出域名信息</span><br></pre></td></tr></table></figure>
 
-        include _partial/post/post-meta.pug
+<p>FQDN:Fully Qualified Domain Name 全限定域名，同时带有主机名和域名的名称。</p>
+<p>比如：主机名是big，域名是hhh.com，FQDN就是 big.hhh.com</p>
+<p>解析的类型：</p>
+<ul>
+<li>FQDN –&gt; IP正向解析</li>
+<li>IP –&gt; FQDN反向解析</li>
+</ul>
+<p>一个完整的查询请求经过的流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Client --&gt; hosts文件 --&gt; Client DNS Service Local Cache --&gt; DNS Server（recursion） --&gt; DNS Server Cache --&gt; DNS iteration（迭代） --&gt; 根 --&gt; 顶级域名DNS --&gt; 二级域名DNS</span><br></pre></td></tr></table></figure>
 
-        if post.url
-          a.hty-button.hty-button--raised(href=url_for(post.url), style=`margin-top: 1rem;background-color:${post_type.color}`)=__('post.view_link')
+<p>DNS服务器的类型：</p>
+<ul>
+<li>主DNS服务器：管理和维护所负责解析的域内解析库的服务器</li>
+<li>从DNS服务器：从主服务器或从服务器复制解析库副本<ul>
+<li>序列号：主服务器的DNS数据库版本号</li>
+<li>刷新时间间隔：从主服务器请求同步解析的时间间隔</li>
+<li>重试时间间隔：从服务器请求同步失败时，再次尝试的时间间隔</li>
+<li>过期时长：从服务器联系不上主服务器时，多久后停止服务</li>
+<li>通知机制：主服务器解析库发生变化时，会主动通知从服务器</li>
+</ul>
+</li>
+<li>缓存DNS服务器（转发器）：</li>
+</ul>
+<p>权威DNS服务器：真正保存你要找的域名的IP的服务器</p>
+<p>资源记录：RR Resource Record</p>
+<ul>
+<li><p>SOA：Start Of Authority，起始授权记录，一个区域解析库有且仅有一个SOA记录，必须位于解析库的第一条记录</p>
+</li>
+<li><p>A：Internet Address，正向解析</p>
+</li>
+<li><p>AAAA：正向解析，IPV6</p>
+</li>
+<li><p>PTR：PoinTeR，反向解析</p>
+</li>
+<li><p>NS：Name Server，专用于标明当前区域的DNS服务器</p>
+</li>
+<li><p>CNAME：Canonical Name，别名记录</p>
+</li>
+<li><p>MX：Mail exchanger，邮件交换器</p>
+</li>
+<li><p>TXT：对域名进行标识和说明的一种方式，一般做验证记录时会使用此项</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name		[TTL]		IN			rr_type			value</span><br></pre></td></tr></table></figure>
 
-      section.post-body(itemprop='articleBody')
-        .post-content.markdown-body(style=`--smc-primary:${theme.colors.primary};`)!=post.content
+<p>TTL：time to live 一个DNS记录在DNS服务器上的缓存时间，可以被继承</p>
+<p>@：表示引用当前区域的名字</p>
+<p>相邻的两个记录name相同时，后一个的name可以省略</p>
+</li>
+</ul>
+<h3 id="3-实现主服务器"><a href="#3-实现主服务器" class="headerlink" title="3.实现主服务器"></a>3.实现主服务器</h3><p>bind软件实现</p>
+<ul>
+<li>bind主程序：/usr/sbin/named</li>
+<li>主配置文件：/etc/named.conf,/etc/named.rfc1921.zones,/etc/rndc.key</li>
+<li>管理工具：/usr/sbin/rndc  remote name domain controller ，默认与bind安装在同一主机，且只能通过127.0.0.1连接named进程，提供辅助性的管理功能；953/tcp</li>
+<li>解析库文件：/var/named/ZONE_NAME&gt;ZONE<ul>
+<li>一台物理服务器可以同时为多个区域提供解析</li>
+<li>必须有两个根区域文件；named.cd</li>
+<li>应该有两个实现localhost和本地回环地址的解析库</li>
+</ul>
+</li>
+</ul>
+<p>实现需要的资料：</p>
+<ul>
+<li><p>对主配置文件进行修改</p>
+<p>/etc/named.conf</p>
+</li>
+<li><p>自定义区域解析库文件</p>
+</li>
+</ul>
+<p>/var/named/xxxxx.zone</p>
+<ul>
+<li>生效工具</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">三种方式</span><br><span class="line">rndc reload</span><br><span class="line">systemctl reload named</span><br><span class="line">service named reload</span><br></pre></td></tr></table></figure>
 
-        if theme.reward.enable && page.reward !== false
-          include _partial/post/reward.pug
+<ul>
+<li>测试工具</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">主配置文件语法检查</span><br><span class="line">named-checkconf</span><br><span class="line">解析库文件语法检查</span><br><span class="line">named-checkzone &quot;lvlvl.dota&quot; &#x2F;var&#x2F;named&#x2F;xxxx.dota.zone</span><br><span class="line">dig命令，只用于测试DNS，不会查询hosts文件</span><br><span class="line">host命令</span><br><span class="line">nsloopup命令，可以支持交互和非交互式</span><br></pre></td></tr></table></figure>
 
-        if theme.creative_commons.license && theme.creative_commons.post
-          include _partial/post/post-copyright.pug
+<p>实现步骤：</p>
+<p>1.安装软件包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#yum -y insatll bind bind-utils</span><br></pre></td></tr></table></figure>
 
-    if post.prev || post.next
-      include _partial/post/post-nav.pug
+<p>2.主配置文件修改</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;etc&#x2F;named.conf</span><br><span class="line">注释掉这两行：</span><br><span class="line">&#x2F;&#x2F;  listen-on port 53 &#123; 127.0.0.1; &#125;;</span><br><span class="line">&#x2F;&#x2F;  allow-query     &#123; localhost; &#125;;</span><br><span class="line">[root@localhost etc]#vim named.rfc1912.zones</span><br><span class="line">添加下面的内容：</span><br><span class="line">zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line">     type master;</span><br><span class="line">     file &quot;lv.dota.zone&quot;;</span><br><span class="line">&#125;;         </span><br></pre></td></tr></table></figure>
+
+<p>3.DNS区域数据库文件 位于 /var/named/ 文件夹下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#cp -p &#x2F;var&#x2F;named&#x2F;named.localhost &#x2F;var&#x2F;named&#x2F;lv.dota.zone</span><br><span class="line">[root@localhost named]#vim named.localhost</span><br><span class="line">  1 $TTL 1D                                                                  </span><br><span class="line">  2 @   IN SOA  @ rname.invalid. (</span><br><span class="line">  3                     0   ; serial</span><br><span class="line">  4                     1D  ; refresh</span><br><span class="line">  5                     1H  ; retry</span><br><span class="line">  6                     1W  ; expire</span><br><span class="line">  7                     3H )    ; minimum</span><br><span class="line">  8     NS  @</span><br><span class="line">  9     A   127.0.0.1</span><br><span class="line"> 10     AAAA    ::1</span><br><span class="line"> </span><br><span class="line">[root@localhost named]#vim &#x2F;var&#x2F;named&#x2F;lv.dota.zone </span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN SOA  master admin.lv.dota. (</span><br><span class="line">  3                     0   ; serial</span><br><span class="line">  4                     1D  ; refresh</span><br><span class="line">  5                     1H  ; retry</span><br><span class="line">  6                     1W  ; expire</span><br><span class="line">  7                     3H )    ; minimum</span><br><span class="line">  8     NS  master</span><br><span class="line">  9 master  A   10.0.0.7                                                     </span><br><span class="line"> 10 www     A   10.0.0.3</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>4.检查主配置文件和区域数据库文件的格式是否正确</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">named-checkconf</span><br><span class="line">named-checkzone lv.dota &#x2F;var&#x2F;named&#x2F;lv.dota.zone</span><br><span class="line">检查无误后启动服务</span><br></pre></td></tr></table></figure>
+
+<p>5.启动服务，配合一台http主机</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">systemctl start named</span><br><span class="line">rndc reload #这是重新加载</span><br><span class="line">去http主机上开启服务</span><br><span class="line">systemctl start httpd</span><br><span class="line">echo &quot;for your love&quot; &gt; &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html</span><br></pre></td></tr></table></figure>
+
+<p>6.去一台客户端服务器上测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">首先将客户端的DNS地址配成10.0.0.7</span><br><span class="line">vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0</span><br><span class="line">DNS1&#x3D;10.0.0.7</span><br><span class="line">service network restart</span><br><span class="line">检查DNS是不是改过来了</span><br><span class="line">cat &#x2F;etc&#x2F;resolv.conf</span><br><span class="line">出现nameserver 10.0.0.7就是成功了</span><br><span class="line">用curl命令行浏览器测试</span><br><span class="line">curl www.lv.dota</span><br><span class="line">for your love</span><br><span class="line">成功</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-实现反向解析"><a href="#4-实现反向解析" class="headerlink" title="4.实现反向解析"></a>4.实现反向解析</h3><p>1.修改/etc/named.conf配置，</p>
+<ul>
+<li>监听socket改成当前IP地址，这样才能让监听到其他主机的访问请求</li>
+<li>把访问请求开关打开</li>
+<li>上面两项都可以调成//注释，这样默认都开了</li>
+</ul>
+<p>2.修改/etc/named.rfc1912.zones，将反向解析的zone输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;0.0.10.in-addr.arpa.&quot; IN &#123;</span><br><span class="line">	type master;</span><br><span class="line">	file &quot;10.0.0.zone&quot;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>3.去/var/named/下面写这个文件：10.0.0.zone</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim 10.0.0.zone</span><br><span class="line">$TTL 1D</span><br><span class="line">@	SOA		IN		ns1		admin.lv.dota.(</span><br><span class="line">			0;#序列号</span><br><span class="line">			1D;#刷新时间间隔</span><br><span class="line">			1H;#重试时间间隔</span><br><span class="line">			1W；过期时长，expire</span><br><span class="line">			3H ) ；通知机制</span><br><span class="line">		NS 		ns1.lv.dota.</span><br><span class="line">199		PTR		www.lv.dota.</span><br><span class="line">99		PTR		fun.lv.dota.</span><br><span class="line">#* 序列号：主服务器的DNS数据库版本号</span><br><span class="line">#* 刷新时间间隔：从主服务器请求同步解析的时间间隔</span><br><span class="line">#* 重试时间间隔：从服务器请求同步失败时，再次尝试的时间间隔</span><br><span class="line">#* 过期时长：从服务器联系不上主服务器时，多久后停止服务</span><br><span class="line">#* 通知机制：主服务器解析库发生变化时，会主动通知从服务器</span><br></pre></td></tr></table></figure>
+
+<p>4.去客户端测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]$dig -x 10.0.0.100</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.2rc1-RedHat-9.8.2-0.68.rc1.el6 &lt;&lt;&gt;&gt; -x 10.0.0.100</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NXDOMAIN, id: 10215</span><br><span class="line">;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 0</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;100.0.0.10.in-addr.arpa.	IN	PTR</span><br><span class="line"></span><br><span class="line">;; AUTHORITY SECTION:</span><br><span class="line">0.0.10.in-addr.arpa.	10800	IN	SOA	ns1.0.0.10.in-addr.arpa. admin.lv.dota. 0 86400 3600 604800 10800</span><br><span class="line"></span><br><span class="line">;; Query time: 1 msec</span><br><span class="line">;; SERVER: 10.0.0.7#53(10.0.0.7)</span><br><span class="line">;; WHEN: Sun Sep 13 08:58:38 2020</span><br><span class="line">;; MSG SIZE  rcvd: 94</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]$host 10.0.0.199</span><br><span class="line">199.0.0.10.in-addr.arpa domain name pointer www.lv.dota.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]$nslookup 10.0.0.99</span><br><span class="line">Server:		10.0.0.7</span><br><span class="line">Address:	10.0.0.7#53</span><br><span class="line"></span><br><span class="line">99.0.0.10.in-addr.arpa	name &#x3D; fun.lv.dota.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-实现从服务器"><a href="#5-实现从服务器" class="headerlink" title="5.实现从服务器"></a>5.实现从服务器</h3><p>只有一台主DNS服务器存在单点失败问题，可以建立主DNS服务器的备份服务器，即从服务器，从而实现DNS的容错机制。从服务器可以自动和主服务器进行单向的数据同步，从而和主DNS服务器一样，也拥有区域解析数据库，也可以对外提供查询服务，但从服务器不提供数据更新服务。</p>
+<p>从服务器的要求：</p>
+<ul>
+<li>一台独立的服务器</li>
+<li>在主服务器的区域解析库文件中必须有一条NS记录指向从服务器</li>
+<li>从服务器只需要定义区域，而不需要提供解析库文件，他从主服务器拿解析库文件，解析库文件应该放在/var/named/slaves/下</li>
+<li>主服务器得允许从服务器作区域传送</li>
+<li>主从服务器的时间应该同步</li>
+<li>bind程序的版本应该保持一致，否则应该从服务器版本高，主服务器版本低</li>
+</ul>
+<p>主服务器的配置步骤：</p>
+<p>1.配置/etc/named.conf，设置允许从服务器传输解析库文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;etc&#x2F;named.conf</span><br><span class="line">allow-transfer &#123; 10.0.0.153; &#125;;  &#123;&#125; 中填写从服务器的地址</span><br></pre></td></tr></table></figure>
+
+<p>2.记住/etc/named.rfc1912.zones中设置的zone配置，待会拿到从服务器改改使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">43 zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line">44     type master;</span><br><span class="line">45     file &quot;lv.dota.zone&quot;;</span><br><span class="line">46 &#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3.配置解析库文件/var/named/xxx.zone</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;var&#x2F;named&#x2F;lv.dota.zone</span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN SOA  master admin.lv.dota. (</span><br><span class="line">  3                     0   ; serial</span><br><span class="line">  4                     1D  ; refresh</span><br><span class="line">  5                     1H  ; retry</span><br><span class="line">  6                     1W  ; expire</span><br><span class="line">  7                     3H )    ; minimum</span><br><span class="line">  8     NS  master</span><br><span class="line">  9     NS  slave			#添加的从服务器</span><br><span class="line"> 10 master  A   10.0.0.7 </span><br><span class="line"> 11 slave   A   10.0.0.153   #添加的从服务器解析                                     </span><br><span class="line"> 12 www     A   10.0.0.3</span><br><span class="line">#添加上两条：</span><br><span class="line">		NS slave</span><br><span class="line">	slave	A	10.0.0.153</span><br></pre></td></tr></table></figure>
+
+<p>4.重新加载配置文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#rndc reload</span><br><span class="line">server reload successful</span><br></pre></td></tr></table></figure>
+
+<p>从服务器的配置步骤：</p>
+<p>1.开启允许其他主机访问</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;etc&#x2F;named.conf</span><br><span class="line">&#x2F;&#x2F;  listen-on port 53 &#123; 127.0.0.1; &#125;;</span><br><span class="line">&#x2F;&#x2F;  allow-query     &#123; localhost; &#125;;</span><br><span class="line"> allow-transfer &#123; none; &#125;;  #这一步是设置不允许其他主机从这台从服务器上同步解析库文件</span><br></pre></td></tr></table></figure>
+
+<p>2.配置/etc/named.rfc1912.zones</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">添加一个zone</span><br><span class="line"> 42 zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line"> 43     type slave;</span><br><span class="line"> 44     masters &#123; 10.0.0.7; &#125;;</span><br><span class="line"> 45     file &quot;slaves&#x2F;lv.dota.slave&quot;;</span><br><span class="line"> 46 &#125;;</span><br><span class="line"> 这里的zone名称跟主服务器一样，下面的type改成slave，添加一行设置主服务器地址设置，解析库文件位置是用于放置一会从主服务器同步过来的解析库文件的</span><br></pre></td></tr></table></figure>
+
+<p>3.启动服务：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#systemctl start named</span><br></pre></td></tr></table></figure>
+
+<p>4.去客户端验证</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]$dig www.lv.dota @10.0.0.153</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.2rc1-RedHat-9.8.2-0.68.rc1.el6 &lt;&lt;&gt;&gt; www.lv.dota @10.0.0.153</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 56037</span><br><span class="line">;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 2, ADDITIONAL: 2</span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.lv.dota.			IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.lv.dota.		86400	IN	A	10.0.0.3</span><br><span class="line"></span><br><span class="line">;; AUTHORITY SECTION:</span><br><span class="line">lv.dota.		86400	IN	NS	master.lv.dota.</span><br><span class="line">lv.dota.		86400	IN	NS	slave.lv.dota.</span><br><span class="line"></span><br><span class="line">;; ADDITIONAL SECTION:</span><br><span class="line">master.lv.dota.		86400	IN	A	10.0.0.7</span><br><span class="line">slave.lv.dota.		86400	IN	A	10.0.0.153</span><br><span class="line"></span><br><span class="line">;; Query time: 1 msec</span><br><span class="line">;; SERVER: 10.0.0.153#53(10.0.0.153)</span><br><span class="line">;; WHEN: Sun Sep 13 10:15:28 2020</span><br><span class="line">;; MSG SIZE  rcvd: 118</span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<h3 id="6-实现子域"><a href="#6-实现子域" class="headerlink" title="6.实现子域"></a>6.实现子域</h3><p>子域父域是两台masterDNS主机，父域里面写上子域的域名和地址，子域里面只写自己的区域解析，不用写父域地址。DNS有这个规律，上级知道下级和根域，下级知道自己的区域解析和根域。</p>
+<p>父域设置：父DNS主机设置</p>
+<p>1.关闭加密验证，允许服务器进行区域传输</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">allow-transfer &#123; 子域服务器IP;&#125;;</span><br><span class="line">dnssec-enable no;</span><br><span class="line">dnssec-validation no;</span><br></pre></td></tr></table></figure>
+
+<p>2.配置zone</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;etc&#x2F;named.rfc1912.zones</span><br><span class="line"> 43 zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line"> 44     type master;</span><br><span class="line"> 45     file &quot;lv.dota.zone&quot;;</span><br><span class="line"> 46 &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>3.在/var/named/xxx.zone文件中加入子域的一些项</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;var&#x2F;named&#x2F;lv.dota.zone</span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN SOA  master admin.lv.dota. (</span><br><span class="line">  3                     1   ; serial</span><br><span class="line">  4                     1D  ; refresh</span><br><span class="line">  5                     1H  ; retry</span><br><span class="line">  6                     1W  ; expire</span><br><span class="line">  7                     3H )    ; minimum</span><br><span class="line">  8     NS  master</span><br><span class="line">  9 shanghai    NS  shanghains   #添加子域的NS</span><br><span class="line"> 10 master  A   10.0.0.7</span><br><span class="line"> 11 shanghains    A   10.0.0.153   #子域的IP地址</span><br><span class="line"> 12 fff     A   10.0.0.3</span><br><span class="line"> 13 www     CNAME   fff</span><br></pre></td></tr></table></figure>
+
+<p>4.重新加载</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rndc reload</span><br></pre></td></tr></table></figure>
+
+<p>子域设置：子DNS主机设置</p>
+<p>1.禁止区域传输</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;named.conf</span><br><span class="line">allow-transfer &#123; none;&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>2.配置zone</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;etc&#x2F;named.rfc1912.zones</span><br><span class="line">添加下面的内容，注意zone名称</span><br><span class="line"> 42 zone &quot;shanghai.lv.dota&quot; IN &#123;</span><br><span class="line"> 43     type master;</span><br><span class="line"> 44     file &quot;shanghai.lv.dota.zone&quot;;</span><br><span class="line"> 45 &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>3.创建zone文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]#vim &#x2F;var&#x2F;named&#x2F;shanghai.lv.dota.zone </span><br><span class="line">子域中不需要写父域信息</span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN SOA  master admin.lv.dota. (</span><br><span class="line">  3                     0   ; serial</span><br><span class="line">  4                     1D  ; refresh</span><br><span class="line">  5                     1H  ; retry</span><br><span class="line">  6                     1W  ; expire</span><br><span class="line">  7                     3H )    ; minimum</span><br><span class="line">  8     NS  master</span><br><span class="line">  9 master  A   10.0.0.153</span><br><span class="line"> 10 fff     A   10.0.0.4</span><br><span class="line"> 11 www     CNAME   fff  </span><br></pre></td></tr></table></figure>
+
+<p>真正起作用的是zone名称</p>
+<p>4.测试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">host www.lv.dota</span><br><span class="line">host www.shanghai.lv.dota</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-实现转发"><a href="#7-实现转发" class="headerlink" title="7.实现转发"></a>7.实现转发</h3><p>转发：利用DNS转发，可以将用户的DNS请求，转发至指定的DNS服务，而非默认的根DNS服务器，并将指定服务器查询的返回结果进行缓存，提高效率</p>
+<p>转发需要关闭dnssec功能</p>
+<p>转发的方式：</p>
+<ul>
+<li>全局转发</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">		forward first|only;</span><br><span class="line">		forwarders &#123;ip;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>特定区域转发，仅转发对特定区域的请求，比全局转发优先级高</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;zone_name&quot; IN &#123;</span><br><span class="line">	type forward;</span><br><span class="line">	forward first|only;</span><br><span class="line">	forwarders &#123;ip;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>first:先转发至指定的DNS服务器，如果无法解析查询请求，则本服务器再去根服务器查询</p>
+<p>only：先转发至指定DNS服务器，如果无法解析查询请求，则本服务器将不再去根服务器查询</p>
+<p>主服务器配置：</p>
+<p>主服务器正常配置一个DNS，其他不用配置</p>
+<p>转发（缓存服务器）配置：</p>
+<p>1.配置/etc/named.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;listen-on port 53 &#123;127.0.0.1;&#125;;</span><br><span class="line">&#x2F;&#x2F;allow-query &#123;localhost&#125;</span><br><span class="line">添加下面两行</span><br><span class="line">forward first;</span><br><span class="line">forwarders &#123; 10.0.0.7; &#125;; #主服务器的地址</span><br><span class="line">关闭dnssec功能</span><br><span class="line">dnssec-enable no;</span><br><span class="line">dnssec-validation no;</span><br></pre></td></tr></table></figure>
+
+<p>2.重新加载</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rndc reload</span><br></pre></td></tr></table></figure>
+
+<p>3.测试</p>
+<h3 id="8-实现智能DNS"><a href="#8-实现智能DNS" class="headerlink" title="8.实现智能DNS"></a>8.实现智能DNS</h3><p>1.GSLB概念：Global Server Load Balance全局负载均衡</p>
+<p>GSLB是对服务器和链路进行综合判断来决定由哪个地点的服务器来提供服务，实现异地服务器群服务质量的保证</p>
+<p>GSLB主要的目的是在整个网络范围内将用户的请求定向到最近的节点，GSBL分为基于DNS实现、基于重定向实现、基于路由协议实现，其中最通用的是基于DNS解析方式。</p>
+<p>举个例子，从郑州dig测试<a target="_blank" rel="noopener" href="http://www.jd.com和从北京dig测试www.jd.com,你会发现解析到的ip地址不一样,分别是郑州的ip和北京的ip./">www.jd.com和从北京dig测试www.jd.com，你会发现解析到的IP地址不一样，分别是郑州的IP和北京的IP。</a></p>
+<p>2.CDN 内容分发网络 Content Delivery Network</p>
+<p>公用DNS比如阿里的233.5.5.5，他们都有自己的技术，可以自动判断你的IP是哪个地区的，然后让你的IP地址请求域名解析的时候指向他们当地的DNS服务器，这样根据当地DNS服务器的位置就可以让GSLB知道你的地区，然后把当前地区的内容服务器地址发给你的DNS，你就能享受CDN带来的快速访问了。</p>
+<p><img src="C:\Users\a\AppData\Roaming\Typora\typora-user-images\image-20200914212757775.png" alt="image-20200914212757775"></p>
+<p>工作原理：</p>
+<p>1.用户访问<a target="_blank" rel="noopener" href="http://www.jd.com,发送域名解析请求到dns服务器,比如阿里的223.5.5.5,这时候有个情况,阿里或者国内其他的公用dns服务器有些技术,比如bgp/">www.jd.com，发送域名解析请求到DNS服务器，比如阿里的223.5.5.5，这时候有个情况，阿里或者国内其他的公用DNS服务器有些技术，比如bgp</a> anycast（多个服务器用了一个IP地址），可以让你访问距离你最近的DNS服务器，所以本来223.5.5.5服务器在浙江杭州，但是你访问的223.5.5.5就在郑州。</p>
+<p>2.DNS服务器收到你的解析请求后，就去检查自己的解析库和缓存中有没有<a target="_blank" rel="noopener" href="http://www.jd.com的地址,如果有,就发给你;如果没有,就会从根域开始逐级查找,直到找到www.jd.com的解析地址.因为cdn技术,所以dns服务器找到的地址不是真的ip地址,而是一个cname,别名,指向了京东的gslb,全局负载均衡服务器,负载均衡服务器会根据dns的ip地址判断dns所在的地区,从而把距离该地区最近的内容分发服务器ip解析给dns/">www.jd.com的地址，如果有，就发给你；如果没有，就会从根域开始逐级查找，直到找到www.jd.com的解析地址。因为CDN技术，所以DNS服务器找到的地址不是真的IP地址，而是一个CNAME，别名，指向了京东的GSLB，全局负载均衡服务器，负载均衡服务器会根据DNS的IP地址判断DNS所在的地区，从而把距离该地区最近的内容分发服务器IP解析给DNS</a></p>
+<p>3.DNS收到解析地址后把IP地址返还给用户</p>
+<p>4.用户去访问这个IP地址，获取信息</p>
+<p>5.如果这个IP地址对应的内容分发服务器上有用户需要的全部信息，那么就把全部信息发送给用户；如果内容分发服务器上没有足够的信息，那么它就会找临近的分发服务器查询是否有这个信息，如果有就从其他服务器上拿过来，如果没有，它就会找源服务器要，然后再发送给用户</p>
+<p>6.上面的流程就是CDN的实现，通过DNS服务器，用户得以访问距离自己最近的内容分发服务器，可以用得到最快的信息加载速度，并且CDN还大大缓解了源服务器的访问带宽压力，缓解了运营商的带宽压力。</p>
+<p>通过Linux实现智能DNS：</p>
+<p>1.创建acl</p>
+<p>acl的格式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">11 acl beijingnet &#123;</span><br><span class="line">12     10.0.0.5;</span><br><span class="line">13 &#125;;</span><br><span class="line">14 acl shanghainet &#123;</span><br><span class="line">15     10.0.0.151;</span><br><span class="line">16 &#125;;</span><br><span class="line">17 acl shenzhennet &#123;</span><br><span class="line">18     any;</span><br><span class="line">19 &#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2.创建view</p>
+<p>view的格式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">63 view beijingview &#123;</span><br><span class="line">64     match-clients &#123; beijingnet ; &#125;;</span><br><span class="line">65     include &quot;&#x2F;etc&#x2F;named.rfc1912.zones.beijing&quot;;</span><br><span class="line">66 &#125;;</span><br><span class="line">67 view shanghaiview &#123;</span><br><span class="line">68     match-clients &#123; shanghainet ; &#125;;</span><br><span class="line">69     include &quot;&#x2F;etc&#x2F;named.rfc1912.zones.shanghai&quot;;</span><br><span class="line">70 &#125;;</span><br><span class="line">71 view shenzhenview &#123;</span><br><span class="line">72     match-clients &#123; shenzhennet ; &#125;;</span><br><span class="line">73     include &quot;&#x2F;etc&#x2F;named.rfc1912.zones.shenzhen&quot;;</span><br><span class="line">74 &#125;;</span><br><span class="line">75 include &quot;&#x2F;etc&#x2F;named.root.key&quot;;</span><br></pre></td></tr></table></figure>
+
+<p>3.创建view规定的/etc/named.rfc1912.zones.xxx文件，里面写上zone</p>
+<p>文件格式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">第一个view的zone</span><br><span class="line"> 43 zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line"> 44     type master;</span><br><span class="line"> 45     file &quot;beijing.lv.dota.zone&quot;;</span><br><span class="line"> 46 &#125;;</span><br><span class="line"> 47 zone &quot;.&quot; IN &#123;</span><br><span class="line"> 48     type hint;</span><br><span class="line"> 49     file &quot;named.ca&quot;;</span><br><span class="line"> 50 &#125;;   </span><br><span class="line">第二个view的zone</span><br><span class="line"> 43 zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line"> 44     type master;</span><br><span class="line"> 45     file &quot;shanghai.lv.dota.zone&quot;;</span><br><span class="line"> 46 &#125;;</span><br><span class="line"> 47 zone &quot;.&quot; IN &#123;</span><br><span class="line"> 48     type hint;</span><br><span class="line"> 49     file &quot;named.ca&quot;;</span><br><span class="line"> 50 &#125;;</span><br><span class="line">第三个view的zone</span><br><span class="line"> 43 zone &quot;lv.dota&quot; IN &#123;</span><br><span class="line"> 44     type master;</span><br><span class="line"> 45     file &quot;shenzhen.lv.dota.zone&quot;;</span><br><span class="line"> 46 &#125;;</span><br><span class="line"> 47 zone &quot;.&quot; IN &#123;</span><br><span class="line"> 48     type hint;</span><br><span class="line"> 49     file &quot;named.ca&quot;;</span><br><span class="line"> 50 &#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>4.创建zone文件规定的.zone解析库文件，放在/var/named/xxxx.zone</p>
+<p>格式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"> 第一个.zone文件</span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN  SOA     master  admin.lv.dota. (</span><br><span class="line">  3                       1  ;serial</span><br><span class="line">  4                       1D  ;refresh</span><br><span class="line">  5                       1H ;retry</span><br><span class="line">  6                       1W   ;expire</span><br><span class="line">  7                      3H  ) ; minimal</span><br><span class="line">  8         NS      master</span><br><span class="line">  9 master  A       10.0.0.7</span><br><span class="line"> 10 www     A       10.0.0.7 #不同的地方就是这里，www.lv.dota解析到了不同的IP地址</span><br><span class="line">第二个.zone文件</span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN  SOA     master  admin.lv.dota. (</span><br><span class="line">  3                       1  ;serial</span><br><span class="line">  4                       1D  ;refresh</span><br><span class="line">  5                       1H ;retry</span><br><span class="line">  6                       1W   ;expire</span><br><span class="line">  7                      3H  ) ; minimal</span><br><span class="line">  8         NS      master</span><br><span class="line">  9 master  A       10.0.0.7</span><br><span class="line"> 10 www     A       10.0.0.3 #这里就是不同点</span><br><span class="line">第三个.zone文件</span><br><span class="line">  1 $TTL 1D</span><br><span class="line">  2 @   IN  SOA     master  admin.lv.dota. (</span><br><span class="line">  3                       1  ;serial</span><br><span class="line">  4                       1D  ;refresh</span><br><span class="line">  5                       1H ;retry</span><br><span class="line">  6                       1W   ;expire</span><br><span class="line">  7                      3H  ) ; minimal</span><br><span class="line">  8         NS      master</span><br><span class="line">  9 master  A       10.0.0.7</span><br><span class="line"> 10 www     A       10.0.0.4 #这里是不同点</span><br></pre></td></tr></table></figure>
+
+<p>OK，分别从三个acl规定的区域中的IP解析<a target="_blank" rel="noopener" href="http://www.lv.dota,就会得到三个不同的ip地址了!/">www.lv.dota，就会得到三个不同的IP地址了！</a></p>
+<h3 id="9-综合实验：DNS的使用"><a href="#9-综合实验：DNS的使用" class="headerlink" title="9.综合实验：DNS的使用"></a>9.综合实验：DNS的使用</h3><p>1.关于缓存（转发）服务器：</p>
+<p>A是本地DNS服务器</p>
+<p>B是转发服务器</p>
+<p>A上面只配置开启转发，关闭安全加密选项</p>
+<p>B上面配置一些域解析库，关闭安全加密选项</p>
+<p>forward firest 是本地DNS首先会把客户端的解析请求转发到转发DNS服务器上，如果转发DNS服务器无法解析，那么本地DNS服务器会自己去找根服务器去迭代查询，直到有一个成功或失败的结果。</p>
+<p>forward only 是本地DNS直接把客户端的解析请求转发到转发DNS服务器上，如果转发DNS服务器无法解析，那么本地DNS服务器也不管了，给客户端返回一个失败。</p>
+</div><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-hand-coin-line"></use></svg></span><div id="reward-comment">I'm so cute. Please give me money.</div><div id="qr" style="display:none;"><div style="display:inline-block"><a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/alipay-qrcode.jpg"><img loading="lazy" src="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/alipay-qrcode.jpg" alt="支付宝" title="支付宝"></a><div><span style="color:#00A3EE"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-alipay-line"></use></svg></span></div></div><div style="display:inline-block"><a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/qqpay-qrcode.png"><img loading="lazy" src="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/qqpay-qrcode.png" alt="QQ 支付" title="QQ 支付"></a><div><span style="color:#12B7F5"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-qq-line"></use></svg></span></div></div><div style="display:inline-block"><a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/wechatpay-qrcode.jpg"><img loading="lazy" src="https://cdn.jsdelivr.net/gh/YunYouJun/cdn/img/donate/wechatpay-qrcode.jpg" alt="微信支付" title="微信支付"></a><div><span style="color:#2DC100"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-wechat-pay-line"></use></svg></span></div></div></div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>huihui</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="http://example.com/2020/11/18/DNS%E6%9C%8D%E5%8A%A1%E5%92%8CBIND%E8%BD%AF%E4%BB%B6/" title="DNS服务和BIND软件">http://example.com/2020/11/18/DNS%E6%9C%8D%E5%8A%A1%E5%92%8CBIND%E8%BD%AF%E4%BB%B6/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><svg class="icon"><use xlink:href="#icon-creative-commons-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-by-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-nc-line"></use></svg><svg class="icon"><use xlink:href="#icon-creative-commons-sa-line"></use></svg></a> 许可协议。</li></ul></section></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2020/11/18/Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E7%AE%A1%E7%90%86/" rel="prev" title="Linux启动和内核管理"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-left-s-line"></use></svg><span class="post-nav-text">Linux启动和内核管理</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2020/11/18/LVS/" rel="next" title="LVS"><span class="post-nav-text">LVS</span><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-right-s-line"></use></svg></a></div></div></div><div id="comment"><div class="comment-tooltip text-center"><span>点击按钮跳转 GitHub Issues 评论。</span><br><span>若没有本文 Issue，您可以使用 Comment 模版新建。</span><br><a class="hty-button hty-button--raised" id="github-issues" target="_blank" rel="noopener" href="https://github.com/YunYouJun/yunyoujun.github.io/issues?q=is:issue+DNS服务和BIND软件">GitHub Issues</a></div></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2020 </span><span class="with-love" id="animate"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-cloud-line"></use></svg></span><span class="author"> huihui</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.2.0</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.3.0</span></div></footer><a class="hty-icon-button" id="goUp" aria-label="back-to-top" href="#"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-arrow-up-s-line"></use></svg><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></div><script defer src="/js/utils.js"></script><script defer src="/js/hexo-theme-yun.js"></script></body></html>
